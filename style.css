@@ -1,0 +1,1338 @@
+/* --- Глобальные переменные и стили (добавляем новые) --- */
+:root {
+    --main-font: 'Arial', sans-serif;
+    --text-color: #333;
+    --background-color: #f0f0f0; /* Фон страницы */
+    --resume-background: #fff; /* Фон самого листа резюме */
+    --block-background: #fff;
+    --border-color: #e0e0e0;
+    --border-color-light: #f5f5f5;
+    --accent-color-primary: #4a90e2; /* Основной акцент (синий) */
+    --accent-color-secondary: #50e3c2; /* Вторичный акцент */
+    --icon-color: #666;
+    --placeholder-color: #ccc;
+    --danger-color: #e74c3c; /* Для кнопок удаления */
+    --toolbar-background: #444;
+    --toolbar-button-color: #fff;
+    /* Добавляем системные шрифты в стек на всякий случай */
+    --font-arial: Arial, Helvetica, sans-serif;
+    --font-times: "Times New Roman", Times, serif;
+    --font-verdana: Verdana, Geneva, sans-serif;
+    --font-georgia: Georgia, serif;
+    --font-courier: "Courier New", Courier, monospace;
+    /* Добавляем шрифты из Google Fonts */
+    --font-roboto: 'Roboto', sans-serif;
+    --font-open-sans: 'Open Sans', sans-serif;
+    --font-lato: 'Lato', sans-serif;
+    --font-montserrat: 'Montserrat', sans-serif;
+    --font-merriweather: 'Merriweather', serif;
+    --font-playfair: 'Playfair Display', serif;
+
+    --modal-background: rgba(0, 0, 0, 0.6); /* Фон модального окна */
+    --h2-underline-color: var(--accent-color-primary); /* Глобальный цвет по умолчанию */
+    --section-h2-underline-color: inherit; /* Переменная для секции, наследует по умолчанию */
+}
+
+body {
+    font-family: var(--main-font);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+* { box-sizing: border-box; }
+
+a { color: var(--accent-color-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+
+/* Специфичные стили для select в глобальной панели */
+.global-control-select {
+    -webkit-appearance: none; /* Убираем стандартный вид */
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 25px; /* Место для стрелки */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23555555%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Серая стрелка */
+    background-repeat: no-repeat;
+    background-position: right 8px top 50%;
+    background-size: 10px auto;
+    max-width: 180px; /* Ограничим ширину */
+    height: 31px; /* Выравниваем по высоте с кнопкой */
+    line-height: 1; /* Убираем лишнюю высоту строки */
+}
+
+/* Стиль для опций внутри ГЛОБАЛЬНОГО селекта */
+#globalFontSelect option {
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Стили для выпадающего списка добавления блока */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-menu {
+    display: none; /* Скрыто по умолчанию */
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 101; /* Выше панели */
+    border-radius: 4px;
+    padding: 5px 0;
+    margin-top: 2px; /* Небольшой отступ от кнопки */
+}
+.dropdown-menu button {
+    color: black;
+    padding: 8px 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 0.9em;
+    border-radius: 0; /* Убираем скругление у кнопок внутри */
+}
+.dropdown-menu button:hover {
+    background-color: #e0e0e0;
+}
+/* Класс для показа меню (будет добавляться/удаляться JS) */
+.dropdown-menu.show {
+    display: block;
+}
+
+/* Стили для инпута цвета линии H2 */
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.control-group label {
+    font-size: 0.9em;
+    color: #555;
+    white-space: nowrap; /* Предотвратить перенос label */
+}
+#h2UnderlineColorInput {
+    padding: 0;
+    height: 25px; 
+    width: 40px;
+    background-color: #fff;
+}
+
+
+/* --- Контекстная Панель Редактирования Текста --- */
+.toolbar {
+    background-color: var(--toolbar-background);
+    border-radius: 5px;
+    padding: 5px;
+    display: flex; /* Был inline-flex, но flex тоже подойдет */
+    gap: 4px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+/* Стили для кнопок, селекта, цвета остались прежними */
+.toolbar-button,
+.toolbar-select, /* Применяем стили и к селекту */
+.toolbar-color {
+    background-color: transparent;
+    border: none;
+    color: var(--toolbar-button-color);
+    padding: 5px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+    vertical-align: middle;
+    font-size: 1em; /* Стандартный размер шрифта для кнопок */
+}
+.toolbar-button:hover,
+.toolbar-select:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.toolbar-select {
+    background-color: #555; /* Фон для селекта */
+    color: var(--toolbar-button-color);
+    font-size: 0.9em; /* Размер текста в селекте */
+    padding: 5px 8px;
+    padding-right: 20px; /* Место для стрелки */
+    border: none;
+    border-radius: 3px;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Белая стрелка */
+    background-repeat: no-repeat;
+    background-position: right 8px top 50%;
+    background-size: 10px auto;
+    max-width: 100px; /* Ограничим ширину */
+    text-overflow: ellipsis;
+}
+
+#lineHeightSelect {
+    min-width: 90px; /* Чуть шире для "Интервал" */
+}
+
+/* Стиль опций */
+.toolbar-select option {
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+}
+#fontNameSelect option {
+    background-color: #fff; /* Светлый фон для лучшей читаемости */
+    color: #333;
+    font-size: 14px; /* Читаемый размер */
+}
+.toolbar-color { width: 25px; height: 25px; padding: 2px; border: 1px solid #777; }
+.toolbar-input {
+    background-color: #555;
+    color: var(--toolbar-button-color);
+    border: 1px solid #777;
+    border-radius: 3px;
+    padding: 3px 5px;
+    font-size: 0.9em;
+    text-align: center;
+    vertical-align: middle; /* Выравнивание */
+}
+.toolbar-input:focus {
+    outline: none;
+    border-color: var(--accent-color-primary);
+}
+#applyColorBtn {
+    padding: 5px 8px;
+}
+
+
+/* --- Модальное окно выбора иконок --- */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Фиксированное позиционирование */
+    z-index: 1050; /* Выше всего остального */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Прокрутка, если контента много */
+    background-color: var(--modal-background);
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* Отступы сверху/снизу и авто по бокам для центрирования */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Ширина модального окна */
+    max-width: 600px; /* Максимальная ширина */
+    border-radius: 5px;
+    position: relative;
+}
+.modal-close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.modal-close:hover,
+.modal-close:focus {
+    color: black;
+    text-decoration: none;
+}
+.modal-content h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+.icon-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-height: 400px; /* Ограничение высоты с прокруткой */
+    overflow-y: auto;
+    padding: 10px;
+}
+.icon-list button {
+    background: none;
+    border: 1px solid transparent;
+    font-size: 1.5em; /* Размер иконок */
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 40px; /* Фиксированный размер кнопки */
+    height: 40px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.icon-list button:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+.icon-list button i {
+    color: var(--icon-color);
+}
+
+/* --- Макет Резюме (без изменений) --- */
+#resumeToExport { 
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: var(--resume-background);
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    padding: 30px;
+    transition: font-family 0.2s ease-in-out;
+    position: relative; /* Необходимо для позиционирования дочерних .add-section-placeholder */
+    /* Добавьте небольшой отступ слева, чтобы было место для контролов/кнопок */
+    /* Значение должно быть больше ширины контролов + отступов */
+    margin-left: auto; /* Можно оставить центрирование */
+    margin-right: auto;
+}
+.resume-full-width-container { display: flex; flex-direction: column; gap: 20px; }
+.resume-columns-container { display: flex; }
+.resume-column { flex: 1; min-width: 300px; display: flex; flex-direction: column; min-height: 100px; }
+
+/* --- Стилизация Блоков --- */
+.resume-block { background-color: var(--block-background); padding: 15px; border-radius: 3px; position: relative; overflow: visible; /* ИЗМЕНЕНО: чтобы тултип контрола был виден */ transition: box-shadow 0.2s; }
+.resume-block.draggable { cursor: grab; }
+/* ЗАМЕНА КУРСОРА: Показываем текстовый курсор для редактируемых полей внутри draggable блока */
+.resume-block.draggable [contenteditable="true"] {
+    cursor: text; /* или 'auto' или 'text' */
+}
+.resume-block.draggable:active { cursor: grabbing; }
+.resume-block:not(.sortable-chosen):not(.sortable-ghost):hover { box-shadow: 0 0 0 1px var(--accent-color-primary); }
+.sortable-drag { opacity: 0.9; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.resume-block.is-spanned .span-block i::before { content: "\f422"; }
+
+/* --- Стили для Перетаскивания (ВИДИМОЕ СОДЕРЖИМОЕ + СИНИЙ ОВЕРЛЕЙ) --- */
+
+/* --- Призрак БЛОКА (Синий полупрозрачный оверлей) --- */
+.block-sortable-ghost {
+    position: relative; /* Нужно для позиционирования ::before */
+    opacity: 1 !important; /* САМ элемент-призрак делаем НЕпрозрачным */
+    background-color: transparent; /* Убираем фон */
+    /* Рамка может остаться для обозначения границ */
+    border: 1px dashed var(--accent-color-primary);
+    border-radius: 3px;
+    box-sizing: border-box;
+    z-index: 0; /* Убедимся, что основной элемент ниже оверлея */
+
+    /* УДАЛИТЬ/ЗАКОММЕНТИРОВАТЬ стили, скрывающие содержимое, если они остались */
+    /* НЕ ДОЛЖНО БЫТЬ: visibility: hidden; height: 0; и т.п. */
+
+    /* ОСТАВЛЯЕМ: Скрытие контролов у призрака */
+    .block-controls {
+         display: none !important;
+    }
+}
+
+/* Создаем синий полупрозрачный оверлей для призрака блока */
+.block-sortable-ghost::before {
+    content: ''; /* Обязательно для псевдоэлемента */
+    position: absolute; /* Позиционируем относительно .block-sortable-ghost */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Основной акцентный синий цвет с прозрачностью (настройте % прозрачности по вкусу) */
+    background-color: rgba(74, 144, 226, 0.3); /* 30% прозрачности */
+    border-radius: inherit; /* Наследуем скругление родителя */
+    z-index: 1; /* Оверлей должен быть НАД содержимым призрака */
+}
+
+
+/* --- Призрак СЕКЦИИ (Синий полупрозрачный оверлей) --- */
+.section-sortable-ghost {
+    position: relative; /* Нужно для позиционирования ::before */
+    opacity: 1 !important; /* САМА секция-призрак НЕпрозрачна */
+    background-color: transparent;
+    /* Рамка может остаться */
+    border: 2px dashed var(--accent-color-primary);
+    border-radius: 5px;
+    z-index: 0; /* Ниже оверлея */
+
+    /* УДАЛИТЬ/ЗАКОММЕНТИРОВАТЬ стили, скрывающие содержимое, если они остались */
+
+    /* ОСТАВЛЯЕМ: Скрытие контролов у призрака секции */
+    .section-controls {
+        display: none !important;
+    }
+}
+
+/* Создаем синий полупрозрачный оверлей для призрака секции */
+.section-sortable-ghost::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Синий цвет с прозрачностью (можно чуть менее прозрачный для секций) */
+    background-color: rgba(74, 144, 226, 0.35); /* 35% прозрачности */
+    border-radius: inherit;
+    z-index: 1; /* Оверлей НАД содержимым */
+}
+
+
+/* --- Стили для перетаскиваемого элемента (не призрака) --- */
+/* Эти стили можно оставить как есть */
+.block-sortable-drag {
+  opacity: 0.9;
+}
+.section-sortable-drag {
+   opacity: 0.95;
+   box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+
+/* --- Контролы Блока --- */
+.block-controls { position: absolute; top: -10px; right: 5px; display: flex; gap: 5px; background-color: rgba(240, 240, 240, 0.9); padding: 4px 6px; border-radius: 15px; /* Скругляем */ opacity: 0; transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; transform: translateY(5px); border: 1px solid #ccc; }
+.resume-block:hover .block-controls { opacity: 1; transform: translateY(0); }
+.control-btn { background: none; border: none; cursor: pointer; padding: 3px; font-size: 0.9em; color: var(--icon-color); transition: color 0.2s; line-height: 1; /* Убираем лишнюю высоту */ }
+.control-btn:hover { color: var(--text-color); }
+.control-btn.delete-block:hover,
+.control-btn.delete-item:hover { /* Общий стиль для удаления */
+    color: var(--danger-color);
+}
+.control-btn.span-block:hover { color: var(--accent-color-primary); }
+.control-btn.toggle-title:hover { color: #e67e22; } /* Оранжевый для заголовка */
+
+
+/* --- Content Editable (без изменений) --- */
+[contenteditable="true"] { outline: none; padding: 2px; transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; border-radius: 2px; min-height: 1.2em; }
+[contenteditable="true"]:focus { background-color: #e6f2ff; box-shadow: 0 0 0 1px var(--accent-color-primary); }
+[contenteditable="true"] p:first-child, [contenteditable="true"] h1:first-child, [contenteditable="true"] h2:first-child, [contenteditable="true"] h3:first-child, [contenteditable="true"] ul:first-child { margin-top: 0; }
+[contenteditable="true"] p:last-child, [contenteditable="true"] ul:last-child { margin-bottom: 0; }
+
+
+/* --- Стилизация Конкретных Блоков --- */
+
+/* Заголовки H1/H2/H3 */
+.resume-block h1 { font-size: 2.4em; margin: 0 0 5px 0; font-weight: 600; padding: 2px; /* Добавляем для фокуса */ }
+.resume-block .job-title { font-size: 1.5em; color: var(--accent-color-primary); margin: 0 0 10px 0; font-weight: 500; padding: 2px; /* Добавляем для фокуса */ }
+.resume-block h2 {
+font-size: 1.4em;
+color: #333;
+ /* Убираем акцентный цвет */ border-bottom: 2px solid var(--h2-underline-color);
+ /* Используем переменную */ padding-bottom: 4px;
+margin-top: 0;
+margin-bottom: 15px; font-weight: 600;
+position: relative; /* Для :after если понадобится */
+border-bottom: 2px solid var(--section-h2-underline-color, var(--h2-underline-color));
+}
+.resume-block h3 { font-size: 1.15em; margin-bottom: 5px; margin-top: 0; font-weight: 600; }
+
+/* Скрытие заголовка H2 */
+.resume-block.title-hidden h2 {
+    display: none;
+}
+/* Можно добавить стиль для кнопки toggle-title при скрытом заголовке */
+.resume-block.title-hidden .toggle-title {
+    color: #bdc3c7; /* Серый цвет для неактивной кнопки */
+}
+
+/* Блок Контакты - НОВЫЕ СТИЛИ */
+#contact-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Отступ между контактами */
+    margin-top: 10px;
+}
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.contact-item .change-icon-btn {
+    font-size: 1.2em; /* Размер иконки */
+    border-radius: 50%; /* Круглая кнопка */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent; /* Рамка для ховера */
+}
+.contact-item .change-icon-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+.contact-item .change-icon-btn .icon {
+    color: var(--icon-color);
+    margin: 0; /* Убираем лишние отступы у иконки */
+}
+.contact-item .contact-text {
+    flex-grow: 1; /* Занимает доступное место */
+    font-size: 0.95em;
+}
+.contact-item .contact-text a { /* Стили для ссылки внутри span */
+     color: var(--accent-color-primary);
+}
+.contact-item .delete-item { /* Кнопка удаления элемента списка */
+    font-size: 1em;
+    padding: 5px;
+    margin-left: auto; /* Прижимаем вправо */
+}
+/* Кнопка добавления элемента */
+.add-item-btn {
+    display: inline-flex; /* Для иконки и текста */
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1px dashed #ccc;
+    color: #777;
+    padding: 5px 10px;
+    margin-top: 15px; /* Отступ сверху */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+.add-item-btn:hover {
+    background-color: #f5f5f5;
+    color: #333;
+    border-style: solid;
+    border-color: #aaa;
+}
+.add-item-btn i {
+    font-size: 0.9em;
+}
+
+
+/* Блоки Опыт и Образование */
+.experience-block, .education-block {
+    /* Убираем общий H2 из этих блоков по умолчанию */
+}
+.experience-item, .education-item {padding-top: 10px; padding-bottom: 0; border-bottom: none; /* Убираем разделитель */ }
+.experience-header, .education-header { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 10px; }
+
+/* Обновленный лого плейсхолдер */
+.logo-placeholder {
+    margin-top: 8px;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border: 1px dashed var(--placeholder-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer; /* Весь плейсхолдер кликабельный */
+    overflow: hidden; /* Скрываем выход за границы */
+    transition: border-color 0.2s;
+    background-color: #fafafa; /* Легкий фон */
+}
+.logo-placeholder:hover {
+    border-color: var(--accent-color-primary);
+    background-color: #f5f5f5;
+}
+.logo-image { /* Изображение лого */
+    max-width: 100%;
+    max-height: 100%;
+    display: block; /* Убирает лишние отступы */
+    object-fit: contain; /* Вписывает изображение */
+}
+.logo-icon-placeholder { /* Иконка камеры по умолчанию */
+    font-size: 1.8em;
+    color: var(--placeholder-color);
+    transition: color 0.2s;
+}
+.logo-placeholder:hover .logo-icon-placeholder {
+    color: var(--icon-color);
+}
+/* Скрываем иконку, если есть изображение */
+.logo-placeholder img:not([src=""]):not([style*="display: none"]) + .logo-icon-placeholder {
+    display: none;
+}
+.logo-placeholder input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+.experience-info, .education-info { flex-grow: 1; }
+.experience-info h3, .education-info h3 { margin-top: 0; }
+.experience-info p, .education-info p { margin: 5px 0 0 0; font-size: 0.95em; color: #555; }
+.experience-details, .education-details { padding-left: 0; margin-top: 5px; }
+
+
+/* Блок Языки */
+#language-list { display: flex; flex-direction: column; gap: 10px; }
+.language-item { display: flex; align-items: center; gap: 10px; }
+.language-name { flex-basis: 100px; flex-shrink: 0; font-weight: 500; }
+.language-level-control { display: flex; gap: 4px; cursor: pointer; }
+.level-dot { width: 14px; height: 14px; border-radius: 50%; background-color: var(--border-color); transition: background-color 0.2s; }
+.level-dot.filled { background-color: var(--accent-color-primary); }
+.language-proficiency { font-size: 0.9em; color: #666; flex-grow: 1; text-align: left; }
+.delete-language { margin-left: auto; /* Прижимаем вправо */ }
+/* Кнопка добавления языка внутри блока */
+.add-language-btn { /* Используем общий стиль .add-item-btn */ }
+
+
+/* --- Адаптивность (незначительные правки) --- */
+@media (max-width: 768px) {
+    #resumeToExport { padding: 15px; margin: 10px; }
+    .resume-columns-container { flex-direction: column; gap: 20px; }
+    .resume-column { min-width: unset; gap: 15px; }
+    .global-controls { padding: 8px 10px; gap: 8px; position: static; }
+    .dropdown { display: block; width: 100%; } /* Дропдаун на всю ширину */
+    .dropdown-toggle { width: 100%; justify-content: space-between; }
+    .dropdown-menu { width: 100%; position: static; box-shadow: none; border-top: 1px solid #ccc; }
+
+    .block-controls { /* Делаем контролы крупнее на мобильных */
+        top: -15px;
+        right: 0px;
+        gap: 8px;
+        padding: 5px 8px;
+    }
+     .control-btn { font-size: 1em; }
+     .language-item { flex-wrap: wrap; gap: 5px; }
+     .language-name { flex-basis: auto; }
+}
+
+/* Стили для модального окна подтверждения (добавляем к существующим .modal стилям) */
+#deleteConfirmModal .modal-content {
+    /* Стили для .modal-content уже есть, можно добавить специфичные */
+    padding: 25px;
+}
+
+#deleteConfirmModal h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+#deleteConfirmModal p {
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* Стили для кнопок в модальном окне */
+.modal-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 5px;
+    transition: background-color 0.2s;
+}
+
+.modal-button.confirm {
+    background-color: var(--danger-color, #e74c3c); /* Используем переменную, если есть */
+    color: white;
+}
+.modal-button.confirm:hover {
+    background-color: #c0392b; /* Темнее при наведении */
+}
+
+.modal-button.cancel {
+    background-color: #bdc3c7; /* Серый */
+    color: #333;
+}
+.modal-button.cancel:hover {
+    background-color: #95a5a6; /* Темнее при наведении */
+}
+
+/* Положение крестика закрытия */
+#deleteConfirmModal .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    color: #aaa;
+    cursor: pointer;
+}
+ #deleteConfirmModal .modal-close:hover {
+     color: #333;
+ }
+
+ /* Стили для модального окна URL (дополнения, если нужно) */
+#urlInputModal .modal-content {
+    padding: 20px 25px;
+}
+#urlInputModal h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+#urlInputModal p {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 0.95em;
+}
+
+/* Стили для ползунка ширины колонки */
+.global-controls .range-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.global-controls .range-control label {
+    font-size: 0.9em;
+    color: #555;
+    white-space: nowrap;
+}
+
+.global-controls input[type="range"] {
+    cursor: pointer;
+    flex-grow: 1; /* Позволим ползунку занять место */
+    max-width: 150px; /* Ограничим максимальную ширину */
+    height: 8px; /* Стандартная высота */
+     vertical-align: middle; /* Выравнивание */
+}
+
+.global-controls .range-control span {
+    font-size: 0.9em;
+    color: #333;
+    font-weight: 500;
+}
+
+
+/* --- Стилизация Секций --- */
+.resume-section {
+    position: relative; /* Для позиционирования контролов */
+    border: 1px dashed transparent; /* Граница для ховера/перетаскивания */
+    transition: border-color 0.2s;
+}
+
+.resume-section:not(.sortable-chosen):not(.sortable-drag):hover {
+   /* border-color: var(--border-color-light, #f0f0f0); /* Цвет границы при наведении (светло-серый) */
+    /* Или можно использовать более заметный цвет: */
+     border-color: var(--accent-color-primary); 
+}
+
+.resume-section.draggable-section {
+    cursor: default; /* У секции нет курсора grab по умолчанию */
+}
+
+/* При наведении на секцию (НЕ на ручку) */
+/* .resume-section:hover {
+    border-color: var(--border-color);
+} */
+
+/* Стили для секции во время перетаскивания */
+.resume-section.sortable-chosen {
+     /* Можно добавить легкую тень при поднятии */
+     /* box-shadow: 0 2px 10px rgba(0,0,0,0.1); */
+     border-color: var(--accent-color-primary);
+}
+.resume-section.sortable-drag {
+   opacity: 0.9;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+
+/* --- Контролы Секции (ОБНОВЛЕНО) --- */
+.section-controls {
+    position: absolute;
+    top: -45px;
+    margin-right: 10px;
+    left: auto;
+    transform: none;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px; /* Уменьшим gap */
+    background-color: rgba(220, 220, 220, 0.95); /* Чуть плотнее фон */
+    padding: 5px; /* Уменьшим паддинг */
+    border-radius: 18px; /* Более скругленные края */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 50;
+    border: 1px solid #bbb;
+    align-items: center; /* Выровняем элементы по центру вертикально */
+}
+
+/* Показываем при наведении на секцию */
+.resume-section:hover .section-controls {
+    opacity: 1;
+}
+
+/* Стили для элементов внутри .section-controls */
+.section-controls .control-btn,
+.section-controls .control-select,
+.section-controls .control-color,
+.section-controls .control-range,
+.section-controls .control-subgroup label,
+.section-controls .control-value {
+    font-size: 0.85em; /* Уменьшим шрифт контролов */
+    vertical-align: middle;
+    margin: 0; /* Убираем лишние отступы */
+    padding: 3px 5px; /* Компактные паддинги */
+    height: 24px; /* Фиксируем высоту для выравнивания */
+    box-sizing: border-box;
+}
+.section-controls .control-btn {
+     height: 24px;
+     width: 24px; /* Квадратные кнопки для иконок */
+     padding: 0;
+     line-height: 24px;
+     text-align: center;
+}
+.section-controls .control-btn .control-label { /* Скрываем текст по умолчанию */
+    display: none;
+}
+.section-controls .control-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    padding-right: 18px; /* Меньше места для стрелки */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23555555%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 5px top 50%;
+    background-size: 8px auto;
+    max-width: 100px; /* Ограничим ширину селекта */
+    cursor: pointer;
+}
+.section-controls .control-select option { /* Стили для опций внутри селекта секции */
+     font-family: inherit; /* Наследуем шрифт самой опции */
+     background-color: #fff;
+     color: #333;
+     font-size: 13px;
+}
+
+.section-controls .control-subgroup {
+    display: inline-flex; /* Для label + input */
+    align-items: center;
+    gap: 3px;
+    padding: 0 4px; /* Небольшие отступы для группы */
+    background-color: rgba(255,255,255, 0.4); /* Полупрозрачный фон для группы */
+    border-radius: 3px;
+    height: 24px;
+}
+.section-controls .control-subgroup label {
+    padding: 0;
+    color: #444;
+    font-weight: 500;
+    cursor: default;
+    height: auto; /* Авто высота для label */
+}
+
+.section-controls .control-color {
+    padding: 0;
+    width: 20px; /* Уменьшим пикер цвета */
+    height: 20px;
+    border: 1px solid #aaa;
+    background: none;
+    cursor: pointer;
+    vertical-align: middle; /* Для центрирования */
+}
+.section-controls .control-range {
+    padding: 0;
+    height: 6px; /* Тонкий слайдер */
+    max-width: 60px; /* Уменьшим ширину слайдера */
+    cursor: pointer;
+    vertical-align: middle; /* Для центрирования */
+}
+.section-controls .control-value {
+    padding: 0 3px;
+    min-width: 28px; /* Минимальная ширина для % */
+    text-align: right;
+    font-weight: 500;
+    color: #333;
+    height: auto; /* Авто высота */
+}
+
+/* Стилизация дропдауна добавления блока внутри контролов секции */
+.section-controls .section-dropdown {
+    position: relative; /* Для позиционирования меню */
+    display: inline-block; /* Чтобы был в строке */
+}
+.section-controls .dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--icon-color);
+    border-radius: 3px;
+    /* height и width уже заданы выше для .control-btn */
+}
+.section-controls .dropdown-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+.section-controls .section-add-block-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 150px; /* Ширина меню */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 101; /* Выше панели */
+    border-radius: 4px;
+    padding: 5px 0;
+    top: 100%; /* Появляется под кнопкой */
+    left: 0; /* Выравниваем по левому краю кнопки */
+    margin-top: 4px; /* Небольшой отступ */
+}
+.section-controls .section-dropdown .section-add-block-dropdown.show {
+    display: block;
+}
+.section-controls .section-add-block-dropdown button {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 0.9em;
+    border-radius: 0;
+    cursor: pointer;
+}
+.section-controls .section-add-block-dropdown button:hover {
+    background-color: #e0e0e0;
+}
+
+
+/* --- Кнопка Добавления Секции (Сбоку) --- */
+.add-section-placeholder {
+    /* ЗАМЕНА: Абсолютное позиционирование */
+    position: absolute;
+    right: 100%; /* Размещаем слева от родителя (#resumeToExport) */
+    margin-right: 35px; /* Отступ от края резюме */
+    top: 0; /* Будет изменено JS */
+    /* --- Сброс ненужных стилей --- */
+    height: auto;
+    width: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    /* --- Остальные стили (оставляем/корректируем) --- */
+    display: flex; /* Можно оставить flex для выравнивания кнопки */
+    justify-content: center;
+    align-items: center;
+    opacity: 0; /* Скрыта по умолчанию */
+    transition: opacity 0.3s, top 0.2s ease-out; /* Добавляем анимацию для top */
+    z-index: 40; /* Ниже контролов секции */
+}
+
+/* Показываем кнопку при наведении на *весь контейнер* резюме */
+/* (Показывать при наведении на секции сложнее при абсолютном позиционировании) */
+#resumeToExport:hover .add-section-placeholder {
+     opacity: 1;
+}
+
+/* Стили самой кнопки "+" (остаются как было) */
+.add-section-btn {
+    background-color: var(--accent-color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1em;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background-color 0.2s, transform 0.1s;
+    /* z-index не нужен, т.к. родитель .add-section-placeholder имеет z-index */
+}
+.add-section-btn:hover {
+    background-color: #3a80d2;
+    transform: scale(1.1);
+}
+
+/* Показываем кнопку при наведении на родителя (resumeToExport) */
+/* Либо можно показывать при наведении на соседние секции */
+#resumeToExport:hover .add-section-placeholder {
+     opacity: 1;
+}
+/* ИЛИ альтернативный вариант - показывать только между секциями при наведении */
+/* .resume-section:hover + .add-section-placeholder,
+.add-section-placeholder:hover {
+    opacity: 1;
+} */
+
+.add-section-btn {
+    background-color: var(--accent-color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1em;
+    line-height: 28px; /* Центрируем иконку */
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background-color 0.2s, transform 0.1s;
+    z-index: 40; /* Ниже контролов секции */
+}
+.add-section-btn:hover {
+    background-color: #3a80d2; /* Темнее синий */
+    transform: scale(1.1);
+}
+
+/* Опции добавления (появляются при клике на +) */
+.add-section-options {
+    display: none; /* Скрыты по умолчанию */
+    position: absolute;
+    /* ЗАМЕНА: Позиционируем справа от placeholder-а */
+    left: 100%; /* Левый край опций у правого края placeholder */
+    top: 50%;   /* Вертикально по центру относительно placeholder */
+    transform: translateY(-50%); /* Точная вертикальная центровка */
+    margin-left: 8px; /* Отступ между "+" и опциями */
+    bottom: auto; /* Сбрасываем bottom */
+    /* --- Остальные стили (оставляем как были) --- */
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    padding: 5px;
+    z-index: 45; /* Выше кнопки + */
+    white-space: nowrap;
+}
+.add-section-options.show {
+    display: flex; /* Показываем как flex */
+    gap: 5px;
+}
+.add-section-options button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    background-color: #e9e9e9;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.add-section-options button:hover {
+    background-color: #d8d8d8;
+}
+
+
+/* Убираем кнопку span-block из блока, если она там осталась */
+.resume-block .block-controls .span-block {
+    display: none !important;
+}
+
+/* Адаптивность для контролов секции */
+@media (max-width: 900px) { /* Точка, когда контролы могут не помещаться */
+    .section-controls {
+        /* Можно попробовать переносить */
+         flex-wrap: wrap;
+         max-width: 60px; /* Ширина примерно для двух столбцов кнопок */
+         right: auto; /* Вернуть слева */
+         left: 100%;
+         margin-left: 10px;
+         margin-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    /* На совсем маленьких экранах можно скрыть часть контролов или перенести */
+     .section-controls {
+         /* Можно вернуть обратно налево, если мешает */
+         right: 100%;
+         left: auto;
+         margin-left: 0;
+         margin-right: 5px; /* Меньше отступ */
+         max-width: 50px; /* Еще уже */
+         gap: 4px;
+     }
+     /* Скрываем некоторые контролы для экономии места */
+     .section-controls .control-select,
+     .section-controls .range-control {
+         /* display: none; /* Вариант: скрыть совсем */
+     }
+      /* Или показываем текст у кнопки добавления блока */
+     .section-controls .section-add-block-btn .control-label {
+         display: inline; /* Показать текст "Блок" */
+     }
+      .section-controls .section-add-block-btn i.fa-plus {
+         display: none; /* Скрыть иконку + */
+     }
+      .section-controls .section-add-block-btn {
+         width: auto; /* Авто ширина по тексту */
+         padding: 3px 8px;
+      }
+}
+
+
+/* input_file_2.css - Potential additions/modifications */
+
+/* Style for active underline button */
+.toolbar-button[data-command="underline"].active {
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Experience/Education item styling */
+.experience-items-container,
+.education-items-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px; /* Space below header */
+}
+
+.experience-item,
+.education-item {
+    position: relative; /* Needed if delete button is absolutely positioned inside */
+}
+.experience-item:last-child,
+.education-item:last-child {
+    border-bottom: none;
+}
+
+
+/* Position the delete button for items */
+.experience-header .delete-item,
+.education-header .delete-item {
+    /* Option 1: Align with header content */
+     margin-left: auto; /* Push to the right */
+     align-self: flex-start; /* Align to the top of the header flex container */
+     padding: 5px; /* Make clickable area slightly larger */
+
+    /* Option 2: Absolute position (alternative) */
+    /* position: absolute; */
+    /* top: 5px; */
+    /* right: 5px; */
+    /* z-index: 5; */ /* Ensure it's above other elements */
+}
+
+/* Style for Add Item buttons */
+.add-experience-item-btn,
+.add-education-item-btn {
+    /* Inherits .add-item-btn styles */
+    margin-top: 10px; /* Adjust spacing */
+}
+
+/* Ensure headers in exp/edu blocks follow section style */
+.experience-block > h2,
+.education-block > h2 {
+     font-size: 1.4em;
+     color: #333;
+     border-bottom: 2px solid var(--section-h2-underline-color, var(--h2-underline-color));
+     padding-bottom: 4px;
+     margin-top: 0;
+     margin-bottom: 15px;
+     font-weight: 600;
+}
+/* Hide header if title-hidden class is present */
+.experience-block.title-hidden > h2,
+.education-block.title-hidden > h2 {
+    display: none;
+}
+
+/* Styles for multi-position within Experience block */
+.experience-info .positions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px; /* Minimal gap between position lines */
+    margin-bottom: 5px; /* Space before Add Position button */
+}
+
+.position-entry p {
+    margin: 2px 0; /* Reduce paragraph margins */
+    display: flex; /* Align items horizontally */
+    align-items: center;
+    gap: 5px; /* Space between position, dates, button */
+}
+
+.position-entry .job-position {
+    /* Optional: specific styling for position */
+    font-weight: 500;
+}
+
+.position-entry .work-dates {
+    /* Optional: specific styling for dates */
+    font-size: 0.9em;
+    color: #555;
+}
+
+.position-entry .delete-position-entry {
+    margin-left: auto; /* Push delete button to the right */
+    padding: 2px 4px; /* Smaller padding for inline delete */
+    font-size: 0.85em;
+    line-height: 1;
+}
+
+.experience-info .add-position-btn {
+     /* Use general .add-item-btn styles */
+     font-size: 0.85em; /* Make it slightly smaller */
+     padding: 3px 8px;
+     margin-top: 5px; /* Override default margin if needed */
+     border-style: dashed;
+}
+
+/* Adjust spacing for the main Add Company button */
+.add-experience-item-btn {
+    margin-top: 15px; /* Space after the last company item */
+}
+
+/* Ensure delete button for the *whole* company item is positioned correctly */
+.experience-header .delete-experience-item {
+    margin-left: auto;
+    align-self: flex-start;
+     padding: 5px;
+}
+.toolbar-value-display {
+    background-color: #555; /* Match other inputs/selects */
+    color: var(--toolbar-button-color);
+    padding: 3px 8px; /* Similar padding */
+    border-radius: 3px;
+    font-size: 0.9em;
+    min-width: 45px; /* Ensure space for "XXpx" */
+    text-align: center;
+    vertical-align: middle;
+    display: inline-block; /* Allow vertical alignment */
+    line-height: 1.4; /* Adjust line height for vertical centering */
+    height: 25px; /* Match color picker height */
+    box-sizing: border-box;
+}
+
+
+/* Font Size Classes (1px to 72px) for use with Rangy CSS Class Applier */
+.font-size-1 { font-size: 1px !important; }
+.font-size-2 { font-size: 2px !important; }
+.font-size-3 { font-size: 3px !important; }
+.font-size-4 { font-size: 4px !important; }
+.font-size-5 { font-size: 5px !important; }
+.font-size-6 { font-size: 6px !important; }
+.font-size-7 { font-size: 7px !important; }
+.font-size-8 { font-size: 8px !important; }
+.font-size-9 { font-size: 9px !important; }
+.font-size-10 { font-size: 10px !important; }
+.font-size-11 { font-size: 11px !important; }
+.font-size-12 { font-size: 12px !important; }
+.font-size-13 { font-size: 13px !important; }
+.font-size-14 { font-size: 14px !important; }
+.font-size-15 { font-size: 15px !important; }
+.font-size-16 { font-size: 16px !important; }
+.font-size-17 { font-size: 17px !important; }
+.font-size-18 { font-size: 18px !important; }
+.font-size-19 { font-size: 19px !important; }
+.font-size-20 { font-size: 20px !important; }
+.font-size-21 { font-size: 21px !important; }
+.font-size-22 { font-size: 22px !important; }
+.font-size-23 { font-size: 23px !important; }
+.font-size-24 { font-size: 24px !important; }
+.font-size-25 { font-size: 25px !important; }
+.font-size-26 { font-size: 26px !important; }
+.font-size-27 { font-size: 27px !important; }
+.font-size-28 { font-size: 28px !important; }
+.font-size-29 { font-size: 29px !important; }
+.font-size-30 { font-size: 30px !important; }
+.font-size-31 { font-size: 31px !important; }
+.font-size-32 { font-size: 32px !important; }
+.font-size-33 { font-size: 33px !important; }
+.font-size-34 { font-size: 34px !important; }
+.font-size-35 { font-size: 35px !important; }
+.font-size-36 { font-size: 36px !important; }
+.font-size-37 { font-size: 37px !important; }
+.font-size-38 { font-size: 38px !important; }
+.font-size-39 { font-size: 39px !important; }
+.font-size-40 { font-size: 40px !important; }
+.font-size-41 { font-size: 41px !important; }
+.font-size-42 { font-size: 42px !important; }
+.font-size-43 { font-size: 43px !important; }
+.font-size-44 { font-size: 44px !important; }
+.font-size-45 { font-size: 45px !important; }
+.font-size-46 { font-size: 46px !important; }
+.font-size-47 { font-size: 47px !important; }
+.font-size-48 { font-size: 48px !important; }
+.font-size-49 { font-size: 49px !important; }
+.font-size-50 { font-size: 50px !important; }
+.font-size-51 { font-size: 51px !important; }
+.font-size-52 { font-size: 52px !important; }
+.font-size-53 { font-size: 53px !important; }
+.font-size-54 { font-size: 54px !important; }
+.font-size-55 { font-size: 55px !important; }
+.font-size-56 { font-size: 56px !important; }
+.font-size-57 { font-size: 57px !important; }
+.font-size-58 { font-size: 58px !important; }
+.font-size-59 { font-size: 59px !important; }
+.font-size-60 { font-size: 60px !important; }
+.font-size-61 { font-size: 61px !important; }
+.font-size-62 { font-size: 62px !important; }
+.font-size-63 { font-size: 63px !important; }
+.font-size-64 { font-size: 64px !important; }
+.font-size-65 { font-size: 65px !important; }
+.font-size-66 { font-size: 66px !important; }
+.font-size-67 { font-size: 67px !important; }
+.font-size-68 { font-size: 68px !important; }
+.font-size-69 { font-size: 69px !important; }
+.font-size-70 { font-size: 70px !important; }
+.font-size-71 { font-size: 71px !important; }
+.font-size-72 { font-size: 72px !important; }
+
+/* Optional: Style the span itself if needed */
+span[class^="font-size-"] {
+    line-height: inherit; /* Prevent size changes from breaking line height */
+}
+
+[contenteditable="true"] p {
+    margin-block-start: 0; /* Убираем стандартный отступ СВЕРХУ */
+    margin-block-end: 0; /* Добавляем НЕБОЛЬШОЙ отступ СНИЗУ (подберите значение по вкусу) */
+    /* Если браузер не поддерживает margin-block-*, используйте старые свойства: */
+    /* margin-top: 0; */
+    /* margin-bottom: 0.6em; */
+}
+
+/* Убираем нижний отступ у САМОГО ПОСЛЕДНЕГО абзаца внутри editable,
+   чтобы не было лишнего пространства в конце блока */
+[contenteditable="true"] p:last-child {
+    margin-block-end: 0;
+    /* margin-bottom: 0; */
+}
+
+@page {
+    size: A4 portrait; /* A4 size, portrait orientation */
+    padding-top: 5mm;
+    padding-bottom: 5mm;
+}
+
+/* --- Стили для печати --- */
+@media print {
+    .print-hide {
+        display: none !important; /* Скрываем при печати */
+    }
+
+    body {
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+        font-size: 10pt; /* Adjust base font size for print if needed */
+        /* Эти свойства ВАЖНЫ для печати фонов и цветов */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .global-controls, .block-controls, .toolbar, .add-item-btn, .delete-item, .logo-placeholder input[type="file"], #iconPickerModal { display: none !important; } /* Скрываем новые элементы */
+    #resumeToExport { max-width: 100%; margin: 0; padding-top: 0; padding-bottom: 0; box-shadow: none; border: none; }
+    .resume-block { border: none; 
+        padding-right: 0;
+        padding-left: 0;
+        padding-top: 0;
+        padding-bottom: 15px;
+        page-break-inside: avoid; 
+        page-break-inside: auto !important; /* Allow breaking inside the block */
+        break-inside: auto !important;  
+    }
+    .column-left .resume-block{ 
+     padding-right: 5px !important;
+     }
+    .column-right .resume-block{ 
+     padding-left: 5px !important;
+     }
+    .resume-block:hover { box-shadow: none; }
+    a { text-decoration: none; }
+    /* Стили для печати текста внутри contenteditable */
+    [contenteditable="true"] { background-color: transparent !important; box-shadow: none !important; padding: 0 !important; }
+    /* Скрытие заголовков H2, если они скрыты */
+    .resume-block.title-hidden h2 { display: none; }
+    /* Точки языка */
+    .level-dot { border: 1px solid #ccc; background-color: #fff !important; }
+    .level-dot.filled { background-color: #555 !important; border-color: #555 !important; }
+    /* Логотип */
+     .logo-placeholder { border: none; width: auto; background: none; border: none !important; max-height: 100px; }
+     .logo-icon-placeholder { display: none; } /* Скрываем иконку камеры */
+     .logo-image { display: block !important; /* Убедимся что видно */}
+     .resume-section {
+        padding-bottom: 10px;
+        padding-top: 0;
+        border: none;
+    }
+    .section-controls, .add-section-placeholder {
+        display: none !important;
+    }
+}

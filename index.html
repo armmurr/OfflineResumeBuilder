@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- Changed language to English -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Resume Builder</title> <!-- Translated -->
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="thirdparty/font-awesome/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arial&family=Lato:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto:wght@400;700&family=Times+New+Roman&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Contextual Text Editing Toolbar -->
+    <div id="text-editor-toolbar" class="toolbar" style="display: none; position: absolute; z-index: 1000;">
+            <button class="toolbar-button" data-command="bold" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+            <button class="toolbar-button" data-command="italic" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+            <button class="toolbar-button" data-command="underline" title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>
+            <select id="fontNameSelect" class="toolbar-select" data-command="fontName" title="Select Font"> <!-- Translated -->
+                <!-- Options added by JS -->
+            </select>
+            <button id="decreaseFontSizeBtn" class="toolbar-button" title="Decrease Font Size"><i class="fas fa-minus"></i></button> <!-- Translated -->
+            <span id="fontSizeDisplay" class="toolbar-value-display" title="Current Font Size">16px</span> <!-- Translated -->
+            <button id="increaseFontSizeBtn" class="toolbar-button" title="Increase Font Size"><i class="fas fa-plus"></i></button> <!-- Translated -->
+
+            <select id="lineHeightSelect" class="toolbar-select" title="Line Spacing"> <!-- Translated -->
+                <option value="">Spacing</option> <!-- Translated -->
+                <option value="1">1.0</option>
+                <option value="1.15">1.15</option>
+                <option value="1.2">1.2</option>
+                <option value="1.4">1.4</option>
+                <option value="1.5">1.5</option>
+                <option value="1.6">1.6</option>
+                <option value="1.8">1.8</option>
+                <option value="2">2.0</option>
+                <option value="2.5">2.5</option>
+                <option value="3">3.0</option>
+            </select>
+            <input type="color" id="foreColorInput" class="toolbar-color" title="Select Text Color"> <!-- Translated -->
+            <button id="applyColorBtn" class="toolbar-button" data-command="applyForeColor" title="Apply Color"><i class="fas fa-check"></i></button> <!-- Translated -->
+            <button class="toolbar-button" data-command="createLink" title="Insert Link"><i class="fas fa-link"></i></button> <!-- Translated -->
+            <button class="toolbar-button" data-command="unlink" title="Remove Link"><i class="fas fa-unlink"></i></button> <!-- Translated -->
+            <button class="toolbar-button" data-command="insertUnorderedList" title="Bulleted List"><i class="fas fa-list-ul"></i></button> <!-- Translated -->
+            <button class="toolbar-button" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button> <!-- Translated -->
+    </div>
+     <!-- Icon Picker Modal -->
+     <div id="iconPickerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeIconPicker()">×</span>
+            <h3>Select Icon</h3> <!-- Translated -->
+            <div id="iconPickerList" class="icon-list">
+                <!-- Icons will be added here via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Controls -->
+    <div class="global-controls print-hide" style="text-align: center; padding: 15px; background-color: #e9e9e9; border-bottom: 1px solid #ccc;">
+        <button id="exportJsonBtn" class="modal-button confirm" style="margin-right: 10px;">Save Resume (JSON)</button> <!-- Translated -->
+        <button id="importJsonBtn" class="modal-button cancel">Load Resume (JSON)</button> <!-- Translated -->
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+        <button id="printPdfBtn" class="modal-button cancel" style="margin-left: 10px;"><i class="fas fa-print"></i> Print to PDF</button> <!-- Translated -->
+    </div>
+    <!-- End of global controls -->
+
+    <!-- Resume Container -->
+    <div id="resumeToExport">
+        <!-- Section 1: Two Columns (Header: Name/Contact Left, About Right) -->
+        <div class="resume-section resume-section--two-column draggable-section" style="font-family: Arial; --section-h2-underline-color: #4a90e2;">
+            <!-- Section 1 Controls -->
+            <div class="section-controls">
+                <button class="control-btn drag-section-handle" title="Move Section"><i class="fas fa-grip-vertical"></i></button> <!-- Translated -->
+                <button class="control-btn delete-section" title="Delete Section"><i class="fas fa-trash-alt"></i></button> <!-- Translated -->
+                <div class="dropdown section-dropdown">
+                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Add Block"><i class="fas fa-plus"></i> <span class="control-label">Block</span></button> <!-- Translated -->
+                    <div class="dropdown-menu section-add-block-dropdown">
+                        <button data-block-type="name">Name & Title</button> <!-- Translated -->
+                        <button data-block-type="contact">Contact</button> <!-- Translated -->
+                        <button data-block-type="about">About Me</button> <!-- Translated -->
+                        <button data-block-type="experience">Experience</button> <!-- Translated -->
+                        <button data-block-type="education">Education</button> <!-- Translated -->
+                        <button data-block-type="skills">Skills</button> <!-- Translated -->
+                        <button data-block-type="languages">Languages</button> <!-- Translated -->
+                        <button data-block-type="other">Other</button> <!-- Translated -->
+                        <button data-block-type="custom">Custom Block</button> <!-- Translated -->
+                    </div>
+                </div>
+                <select class="control-select section-font-select" title="Section Font"> </select> <!-- Translated -->
+                <div class="control-subgroup" title="H2 Color"> <!-- Translated -->
+                    <label for="h2Color_s1">H2:</label>
+                    <input type="color" id="h2Color_s1" class="control-color section-h2-color" value="#4a90e2">
+                </div>
+                <div class="control-subgroup range-control" title="Left Column Width"> <!-- Translated -->
+                    <label for="widthSlider_s1">L:</label>
+                    <input type="range" id="widthSlider_s1" class="control-range section-width-slider" min="20" max="80" value="40" step="1">
+                    <span class="control-value section-width-value">40%</span>
+                </div>
+            </div>
+            <!-- Section 1 Columns Container -->
+            <div class="resume-columns-container">
+                <!-- Left Column (Name, Contact) -->
+                <div class="resume-column column-left" style="flex-basis: 40%;">
+                    <!-- Block: Name -->
+                    <div class="resume-block draggable" data-type="name">
+                       <div class="block-controls"> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                       <div contenteditable="false">
+                            <h1 contenteditable="true">Your Name</h1> <!-- Translated -->
+                            <p class="job-title" contenteditable="true">Job Title</p> <!-- Translated -->
+                        </div>
+                    </div>
+                    <!-- Block: Contact -->
+                    <div class="resume-block draggable" data-type="contact">
+                       <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                       <h2 contenteditable="true">Contact Information</h2> <!-- Translated -->
+                       <div id="contact-list-container">
+                           <div class="contact-item"> <button class="control-btn change-icon-btn" title="Change Icon"><i class="fas fa-envelope icon"></i></button> <span class="contact-text" contenteditable="true"><span class="font-size-16">your.email@example.com</span></span> <button class="control-btn delete-item delete-contact" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                           <div class="contact-item"> <button class="control-btn change-icon-btn" title="Change Icon"><i class="fas fa-phone icon"></i></button> <span class="contact-text" contenteditable="true"><span class="font-size-16">+1 (555) 123-4567</span></span> <button class="control-btn delete-item delete-contact" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                           <div class="contact-item"> <button class="control-btn change-icon-btn" title="Change Icon"><i class="fab fa-telegram icon"></i></button> <span class="contact-text" contenteditable="true"><span class="font-size-16">@your_telegram</span></span> <button class="control-btn delete-item delete-contact" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                           <div class="contact-item"> <button class="control-btn change-icon-btn" title="Change Icon"><i class="fab fa-linkedin icon"></i></button> <span class="contact-text" contenteditable="true"><span class="font-size-16">linkedin.com/in/yourprofile</span></span> <button class="control-btn delete-item delete-contact" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                           <div class="contact-item"> <button class="control-btn change-icon-btn" title="Change Icon"><i class="fab fa-github icon"></i></button> <span class="contact-text" contenteditable="true"><span class="font-size-16">github.com/yourusername</span></span> <button class="control-btn delete-item delete-contact" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                       </div>
+                       <button class="add-item-btn add-contact-btn"><i class="fas fa-plus"></i> Add Contact</button> <!-- Translated -->
+                    </div>
+                </div> <!-- End Left Column -->
+                <!-- Right Column (About Me) -->
+                <div class="resume-column column-right">
+                    <!-- Block: About -->
+                     <div class="resume-block draggable" data-type="about">
+                         <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                         <h2 contenteditable="true">About Me</h2> <!-- Translated -->
+                         <div contenteditable="true">
+                             <p><span class="font-size-16">Experienced Frontend Developer with 5+ years of experience creating responsive and performant web applications. Deep knowledge of JavaScript (ES6+), React, Vue.js, and modern build tools. Ability to work in a team, quickly learn new technologies, and solve complex problems. Seeking an opportunity to apply my skills in a dynamic company to create innovative products.</span></p> <!-- Translated Example -->
+                             <p><span class="font-size-16">Strive to write clean, maintainable code and pay attention to user interface details.</span></p> <!-- Translated Example -->
+                         </div>
+                     </div>
+                </div> <!-- End Right Column -->
+            </div> <!-- End Section 1 Columns Container -->
+        </div> <!-- End Section 1 -->
+
+        <!-- Section 2: Full Width (Skills) -->
+        <div class="resume-section resume-section--full-width draggable-section" style="font-family: Verdana; --section-h2-underline-color: #50e3c2;">
+            <!-- Section 2 Controls -->
+            <div class="section-controls">
+                <button class="control-btn drag-section-handle" title="Move Section"><i class="fas fa-grip-vertical"></i></button> <!-- Translated -->
+                <button class="control-btn delete-section" title="Delete Section"><i class="fas fa-trash-alt"></i></button> <!-- Translated -->
+                <div class="dropdown section-dropdown">
+                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Add Block"><i class="fas fa-plus"></i> <span class="control-label">Block</span></button> <!-- Translated -->
+                    <div class="dropdown-menu section-add-block-dropdown">
+                         <button data-block-type="name">Name & Title</button> <!-- Translated -->
+                         <button data-block-type="contact">Contact</button> <!-- Translated -->
+                         <button data-block-type="about">About Me</button> <!-- Translated -->
+                         <button data-block-type="experience">Experience</button> <!-- Translated -->
+                         <button data-block-type="education">Education</button> <!-- Translated -->
+                         <button data-block-type="skills">Skills</button> <!-- Translated -->
+                         <button data-block-type="languages">Languages</button> <!-- Translated -->
+                         <button data-block-type="other">Other</button> <!-- Translated -->
+                         <button data-block-type="custom">Custom Block</button> <!-- Translated -->
+                    </div>
+                </div>
+                <select class="control-select section-font-select" title="Section Font"> </select> <!-- Translated -->
+                <div class="control-subgroup" title="H2 Color"> <!-- Translated -->
+                    <label for="h2Color_s2">H2:</label>
+                    <input type="color" id="h2Color_s2" class="control-color section-h2-color" value="#50e3c2">
+                </div>
+                <!-- No width slider for full width -->
+            </div>
+            <!-- Section 2 Full Width Container -->
+            <div class="resume-full-width-container">
+                <!-- Block: Skills -->
+                <div class="resume-block draggable" data-type="skills">
+                    <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                    <h2 contenteditable="true">Key Skills</h2> <!-- Translated -->
+                    <div contenteditable="true">
+                        <p><span class="font-size-16"><strong>Programming Languages:</strong> JavaScript (ES6+/TypeScript), HTML5, CSS3/SCSS</span></p> <!-- Translated Example -->
+                        <p><span class="font-size-16"><strong>Frameworks/Libraries:</strong> React, Redux, Vue.js, Vuex, Next.js, Node.js (basic)</span></p> <!-- Translated Example -->
+                        <p><span class="font-size-16"><strong>Tools:</strong> Webpack, Babel, Git, Docker (basic), Jest, Cypress</span></p> <!-- Translated Example -->
+                        <p><span class="font-size-16"><strong>Methodologies:</strong> Agile/Scrum, CI/CD</span></p> <!-- Translated Example -->
+                        <p><span class="font-size-16"><strong>Other:</strong> REST API, GraphQL (basic), Responsive Design, Cross-browser Compatibility, Performance Optimization</span></p> <!-- Translated Example -->
+                    </div>
+                </div>
+            </div> <!-- End Section 2 Full Width Container -->
+        </div> <!-- End Section 2 -->
+
+        <!-- Section 3: Two Columns (Experience Left, Education Right) -->
+        <div class="resume-section resume-section--two-column draggable-section" style="font-family: 'Open Sans'; --section-h2-underline-color: #b8e986;">
+            <!-- Section 3 Controls -->
+            <div class="section-controls">
+                 <button class="control-btn drag-section-handle" title="Move Section"><i class="fas fa-grip-vertical"></i></button> <!-- Translated -->
+                <button class="control-btn delete-section" title="Delete Section"><i class="fas fa-trash-alt"></i></button> <!-- Translated -->
+                <div class="dropdown section-dropdown">
+                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Add Block"><i class="fas fa-plus"></i> <span class="control-label">Block</span></button> <!-- Translated -->
+                    <div class="dropdown-menu section-add-block-dropdown">
+                         <button data-block-type="name">Name & Title</button> <!-- Translated -->
+                         <button data-block-type="contact">Contact</button> <!-- Translated -->
+                         <button data-block-type="about">About Me</button> <!-- Translated -->
+                         <button data-block-type="experience">Experience</button> <!-- Translated -->
+                         <button data-block-type="education">Education</button> <!-- Translated -->
+                         <button data-block-type="skills">Skills</button> <!-- Translated -->
+                         <button data-block-type="languages">Languages</button> <!-- Translated -->
+                         <button data-block-type="other">Other</button> <!-- Translated -->
+                         <button data-block-type="custom">Custom Block</button> <!-- Translated -->
+                    </div>
+                </div>
+                <select class="control-select section-font-select" title="Section Font"> </select> <!-- Translated -->
+                <div class="control-subgroup" title="H2 Color"> <!-- Translated -->
+                    <label for="h2Color_s3">H2:</label>
+                    <input type="color" id="h2Color_s3" class="control-color section-h2-color" value="#b8e986">
+                </div>
+                <div class="control-subgroup range-control" title="Left Column Width"> <!-- Translated -->
+                    <label for="widthSlider_s3">L:</label>
+                    <input type="range" id="widthSlider_s3" class="control-range section-width-slider" min="20" max="80" value="65" step="1">
+                    <span class="control-value section-width-value">65%</span>
+                </div>
+            </div>
+            <!-- Section 3 Columns Container -->
+            <div class="resume-columns-container">
+                <!-- Left Column (Experience) -->
+                <div class="resume-column column-left" style="flex-basis: 65%;">
+                    <!-- Block: Experience -->
+                     <div class="resume-block draggable experience-block" data-type="experience">
+                         <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                         <h2 contenteditable="true">Work Experience</h2> <!-- Translated -->
+                         <div class="experience-items-container">
+                             <!-- Company 1 -->
+                             <div class="experience-item">
+                                 <div class="experience-header">
+                                     <div class="logo-placeholder" title="Upload Logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div> <!-- Translated -->
+                                     <div class="experience-info">
+                                         <h3 contenteditable="true">Tech Solutions LLC</h3> <!-- Translated Example -->
+                                         <div class="positions-list">
+                                             <div class="position-entry"> <p> <span contenteditable="true" class="job-position"><span class="font-size-16">Lead Frontend Developer</span></span> | <span contenteditable="true" class="work-dates"><span class="font-size-16">June 2021 - Present</span></span> <button class="control-btn delete-item delete-position-entry" title="Delete Position"><i class="fas fa-times"></i></button> </p> </div> <!-- Translated -->
+                                             <div class="position-entry"> <p> <span contenteditable="true" class="job-position"><span class="font-size-16">Frontend Developer</span></span> | <span contenteditable="true" class="work-dates"><span class="font-size-16">March 2019 - June 2021</span></span> <button class="control-btn delete-item delete-position-entry" title="Delete Position"><i class="fas fa-times"></i></button> </p> </div> <!-- Translated -->
+                                         </div>
+                                         <button class="add-item-btn add-position-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Add Position</button> <!-- Translated -->
+                                      </div>
+                                      <button class="control-btn delete-item delete-experience-item" title="Delete Company"><i class="fas fa-times"></i></button> <!-- Translated -->
+                                 </div>
+                                 <div class="experience-details" contenteditable="true">
+                                     <ul>
+                                         <li><span class="font-size-16">Developed and maintained the company's core web application (React, Redux Toolkit, TypeScript).</span></li> <!-- Translated Example -->
+                                         <li><span class="font-size-16">Mentored junior developers, conducted code reviews.</span></li> <!-- Translated Example -->
+                                         <li><span class="font-size-16">Introduced new technologies and approaches to improve performance and UX.</span></li> <!-- Translated Example -->
+                                         <li><span class="font-size-16">Collaborated closely with backend team and designers.</span></li> <!-- Translated Example -->
+                                     </ul>
+                                 </div>
+                             </div>
+                             <!-- Company 2 -->
+                              <div class="experience-item">
+                                 <div class="experience-header">
+                                     <div class="logo-placeholder" title="Upload Logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div> <!-- Translated -->
+                                     <div class="experience-info">
+                                         <h3 contenteditable="true">Pixel Web Studio</h3> <!-- Translated Example -->
+                                         <div class="positions-list">
+                                             <div class="position-entry"> <p> <span contenteditable="true" class="job-position"><span class="font-size-16">Junior Frontend Developer</span></span> | <span contenteditable="true" class="work-dates"><span class="font-size-16">January 2018 - February 2019</span></span> <button class="control-btn delete-item delete-position-entry" title="Delete Position"><i class="fas fa-times"></i></button> </p> </div> <!-- Translated -->
+                                         </div>
+                                         <button class="add-item-btn add-position-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Add Position</button> <!-- Translated -->
+                                      </div>
+                                      <button class="control-btn delete-item delete-experience-item" title="Delete Company"><i class="fas fa-times"></i></button> <!-- Translated -->
+                                 </div>
+                                 <div class="experience-details" contenteditable="true">
+                                     <ul>
+                                         <li><span class="font-size-16">Converted designs from Figma/Photoshop to code (HTML, CSS, basic JS/jQuery).</span></li> <!-- Translated Example -->
+                                         <li><span class="font-size-16">Created and adapted websites using WordPress CMS.</span></li> <!-- Translated Example -->
+                                         <li><span class="font-size-16">Basic setup and maintenance of client websites.</span></li> <!-- Translated Example -->
+                                     </ul>
+                                 </div>
+                             </div>
+                             <!-- End Company 2 -->
+                         </div> <!-- End experience-items-container -->
+                         <button class="add-item-btn add-experience-item-btn"><i class="fas fa-plus"></i> Add Company</button> <!-- Translated -->
+                     </div>
+                </div> <!-- End Left Column (Experience) -->
+
+                <!-- Right Column (Education) -->
+                <div class="resume-column column-right">
+                    <!-- Block: Education -->
+                     <div class="resume-block draggable education-block" data-type="education">
+                         <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                         <h2 contenteditable="true">Education</h2> <!-- Translated -->
+                         <div class="education-items-container">
+                             <!-- University 1 -->
+                              <div class="education-item">
+                                   <div class="education-header">
+                                       <div class="logo-placeholder" title="Upload Logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div> <!-- Translated -->
+                                       <div class="education-info">
+                                            <h3 contenteditable="true">State Technical University</h3> <!-- Translated Example -->
+                                            <p><span contenteditable="true" class="degree"><span class="font-size-16">Bachelor's Degree, Applied Informatics</span></span> | <span contenteditable="true" class="study-years"><span class="font-size-16">2014 - 2018</span></span></p> <!-- Translated Example -->
+                                        </div>
+                                        <button class="control-btn delete-item delete-education-item" title="Delete"><i class="fas fa-times"></i></button> <!-- Translated -->
+                                   </div>
+                                   <div class="education-details" contenteditable="true"><p><span class="font-size-16">Graduated with honors. Thesis topic: "Development of an interactive data visualization system."</span></p></div> <!-- Translated Example -->
+                               </div>
+                              <!-- Course -->
+                              <div class="education-item">
+                                   <div class="education-header">
+                                       <div class="logo-placeholder" title="Upload Logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div> <!-- Translated -->
+                                       <div class="education-info">
+                                            <h3 contenteditable="true">Online Course: React - The Complete Guide</h3> <!-- Translated Example -->
+                                            <p><span contenteditable="true" class="degree"><span class="font-size-16">Certificate</span></span> | <span contenteditable="true" class="study-years"><span class="font-size-16">2020</span></span></p> <!-- Translated Example -->
+                                        </div>
+                                        <button class="control-btn delete-item delete-education-item" title="Delete"><i class="fas fa-times"></i></button> <!-- Translated -->
+                                   </div>
+                                   <div class="education-details" contenteditable="true"><p><span class="font-size-16">In-depth study of React Hooks, Context API, Redux.</span></p></div> <!-- Translated Example -->
+                               </div>
+                         </div> <!-- End education-items-container -->
+                         <button class="add-item-btn add-education-item-btn"><i class="fas fa-plus"></i> Add Education</button> <!-- Translated -->
+                     </div>
+                </div> <!-- End Right Column (Education) -->
+            </div> <!-- End Section 3 Columns Container -->
+        </div> <!-- End Section 3 -->
+
+         <!-- Section 4: Full Width (Languages & Custom) -->
+        <div class="resume-section resume-section--full-width draggable-section" style="font-family: 'Lato'; --section-h2-underline-color: #f5a623;">
+            <!-- Section 4 Controls -->
+            <div class="section-controls">
+                 <button class="control-btn drag-section-handle" title="Move Section"><i class="fas fa-grip-vertical"></i></button> <!-- Translated -->
+                <button class="control-btn delete-section" title="Delete Section"><i class="fas fa-trash-alt"></i></button> <!-- Translated -->
+                <div class="dropdown section-dropdown">
+                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Add Block"><i class="fas fa-plus"></i> <span class="control-label">Block</span></button> <!-- Translated -->
+                    <div class="dropdown-menu section-add-block-dropdown">
+                         <button data-block-type="name">Name & Title</button> <!-- Translated -->
+                         <button data-block-type="contact">Contact</button> <!-- Translated -->
+                         <button data-block-type="about">About Me</button> <!-- Translated -->
+                         <button data-block-type="experience">Experience</button> <!-- Translated -->
+                         <button data-block-type="education">Education</button> <!-- Translated -->
+                         <button data-block-type="skills">Skills</button> <!-- Translated -->
+                         <button data-block-type="languages">Languages</button> <!-- Translated -->
+                         <button data-block-type="other">Other</button> <!-- Translated -->
+                         <button data-block-type="custom">Custom Block</button> <!-- Translated -->
+                    </div>
+                </div>
+                <select class="control-select section-font-select" title="Section Font"> </select> <!-- Translated -->
+                <div class="control-subgroup" title="H2 Color"> <!-- Translated -->
+                    <label for="h2Color_s4">H2:</label>
+                    <input type="color" id="h2Color_s4" class="control-color section-h2-color" value="#f5a623">
+                </div>
+            </div>
+            <!-- Section 4 Full Width Container -->
+            <div class="resume-full-width-container">
+                <!-- Block: Languages -->
+                 <div class="resume-block draggable" data-type="languages" id="language-block-s4">
+                     <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                     <h2 contenteditable="true">Languages</h2> <!-- Translated -->
+                     <div id="language-list">
+                         <div class="language-item"> <span contenteditable="true" class="language-name"><span class="font-size-16">English</span></span> <div class="language-level-control" data-level="6" title="Level"><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span></div> <span contenteditable="true" class="language-proficiency"><span class="font-size-16">(Native)</span></span> <button class="control-btn delete-item delete-language" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                         <div class="language-item"> <span contenteditable="true" class="language-name"><span class="font-size-16">Spanish</span></span> <div class="language-level-control" data-level="4" title="Level"><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot filled"></span><span class="level-dot"></span><span class="level-dot"></span></div> <span contenteditable="true" class="language-proficiency"><span class="font-size-16">(Upper-Intermediate / B2)</span></span> <button class="control-btn delete-item delete-language" title="Delete"><i class="fas fa-times"></i></button> </div> <!-- Translated -->
+                     </div>
+                     <button class="add-item-btn add-language-btn"><i class="fas fa-plus"></i> Add Language</button> <!-- Translated -->
+                 </div>
+                 <!-- Block: Custom Block (Example) -->
+                 <div class="resume-block draggable" data-type="custom">
+                     <div class="block-controls"> <button class="control-btn toggle-title" title="Toggle Title Visibility"><i class="fas fa-heading"></i></button> <button class="control-btn delete-block" title="Delete Block"><i class="fas fa-trash-alt"></i></button> </div> <!-- Translated -->
+                     <h2 contenteditable="true">Publications / Presentations</h2> <!-- Translated Example -->
+                     <div contenteditable="true">
+                         <p><span class="font-size-16">- Article "Optimizing React Applications for Big Data" on Medium (2022)</span></p> <!-- Translated Example -->
+                         <p><span class="font-size-16">- Presentation "Modern State Management in Vue 3" at Frontend Conf (2023)</span></p> <!-- Translated Example -->
+                     </div>
+                 </div>
+            </div> <!-- End Section 4 Full Width Container -->
+        </div> <!-- End Section 4 -->
+
+    </div> <!-- End Resume Container -->
+
+    <!-- ADD SECTION BUTTON TEMPLATE (hidden by default) -->
+    <template id="addSectionButtonTemplate">
+        <div class="add-section-placeholder">
+            <button class="add-section-btn" title="Add section here"> <!-- Translated -->
+                <i class="fas fa-plus"></i>
+            </button>
+            <div class="add-section-options">
+                <button data-section-type="two-column">Two Columns</button> <!-- Translated -->
+                <button data-section-type="full-width">Full Width</button> <!-- Translated -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="modal-close" id="closeDeleteModal">×</span>
+            <h4>Confirm Deletion</h4> <!-- Translated -->
+            <p>Are you sure you want to delete this block?</p> <!-- Translated (JS might update this) -->
+            <div style="margin-top: 20px;">
+                <button id="confirmDeleteBtn" class="modal-button confirm">Yes, Delete</button> <!-- Translated -->
+                <button id="cancelDeleteBtn" class="modal-button cancel">Cancel</button> <!-- Translated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Input Modal -->
+    <div id="urlInputModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 450px;">
+            <span class="modal-close" id="closeUrlModal">×</span>
+            <h4>Insert/Edit Link</h4> <!-- Translated -->
+            <p>Enter the URL:</p> <!-- Translated -->
+            <input type="url" id="urlInput" placeholder="https://example.com" style="width: 100%; padding: 8px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box;">
+            <div style="text-align: right;">
+                <button id="confirmUrlBtn" class="modal-button confirm">Apply</button> <!-- Translated -->
+                <button id="cancelUrlBtn" class="modal-button cancel">Cancel</button> <!-- Translated -->
+            </div>
+        </div>
+    </div>
+
+<!-- JS Library Includes -->
+<script src="thirdparty/Sortable.min.js"></script>
+<script src="importExport.js"></script>
+<script src="thirdparty/rangy-core.js"></script>
+<script src="thirdparty/rangy-classapplier.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
