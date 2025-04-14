@@ -1,4 +1,4 @@
-# Visual Resume Builder (AI-Generated)
+# Visual Resume (CV) Builder
 
 ## About This Project
 
