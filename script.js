@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
        populateFontDropdown(fontNameSelect, "Шрифт");
 
     // --- Функция для заполнения селекта шрифтов ---
-    function populateFontDropdown(selectElement, defaultOptionText = "Шрифт") {
+    function populateFontDropdown(selectElement, defaultOptionText = "Font") {
        if (!selectElement) return;
        selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; // Очищаем и добавляем дефолт
 
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
               let currentFont = window.getComputedStyle(section).fontFamily;
               currentFont = currentFont.split(',')[0].replace(/['"]/g, '').trim();
               console.log(`[Init Section ${index}] Текущий шрифт computed: ${currentFont}`);
-              populateFontDropdown(fontSelect, "Шрифт секции");
+              populateFontDropdown(fontSelect, "Section Font");
 
               let foundFont = false;
               if (availableFonts[currentFont]) {
@@ -318,50 +318,50 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Секционные контролы ---
         let sectionControlsHTML = `
             <div class="section-controls">
-                <button class="control-btn drag-section-handle" title="Переместить секцию"><i class="fas fa-grip-vertical"></i></button>
-                <button class="control-btn delete-section" title="Удалить секцию"><i class="fas fa-trash-alt"></i></button>
+                <button class="control-btn drag-section-handle" title="Move section"><i class="fas fa-grip-vertical"></i></button>
+                <button class="control-btn delete-section" title="Delete section"><i class="fas fa-trash-alt"></i></button>
 
-                <!-- Добавление блока -->
+                <!-- Add Block Dropdown -->
                 <div class="dropdown section-dropdown">
-                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Добавить блок в эту секцию"><i class="fas fa-plus"></i> <span class="control-label">Блок</span></button>
+                    <button class="control-btn section-add-block-btn dropdown-toggle" title="Add block to this section"><i class="fas fa-plus"></i> <span class="control-label">Block</span></button>
                     <div class="dropdown-menu section-add-block-dropdown">
-                        <button data-block-type="name">Имя и Должность</button>
-                        <button data-block-type="contact">Контакты</button>
-                        <button data-block-type="about">О себе</button>
-                        <button data-block-type="experience">Опыт работы</button>
-                        <button data-block-type="education">Образование</button>
-                        <button data-block-type="skills">Навыки</button>
-                        <button data-block-type="languages">Языки</button>
-                        <button data-block-type="other">Другое</button>
-                        <button data-block-type="custom">Свой блок</button>
+                        <button data-block-type="name">Name & Title</button>
+                        <button data-block-type="contact">Contact</button>
+                        <button data-block-type="about">About Me</button>
+                        <button data-block-type="experience">Experience</button>
+                        <button data-block-type="education">Education</button>
+                        <button data-block-type="skills">Skills</button>
+                        <button data-block-type="languages">Languages</button>
+                        <button data-block-type="other">Other</button>
+                        <button data-block-type="custom">Custom Block</button>
                     </div>
                 </div>
 
-                <!-- Выбор шрифта секции -->
-                <select class="control-select section-font-select" title="Шрифт этой секции">
-                    <!-- Опции будут добавлены JS -->
+                <!-- Section Font Selection -->
+                <select class="control-select section-font-select" title="Section font">
+                    <!-- Options added by JS -->
                 </select>
 
-                <!-- Цвет линии H2 -->
-                <div class="control-subgroup" title="Цвет линии H2 в секции">
+                <!-- Section H2 Line Color -->
+                <div class="control-subgroup" title="Section H2 line color">
                     <label for="h2Color_${uniqueIdSuffix}">H2:</label>
                     <input type="color" id="h2Color_${uniqueIdSuffix}" class="control-color section-h2-color" value="#4a90e2">
                 </div>`;
 
         if (type === 'two-column') {
-            // Добавляем слайдер только для двух колонок
+            // Add slider only for two-column layout
             sectionControlsHTML += `
-                <div class="control-subgroup range-control" title="Ширина левой колонки">
+                <div class="control-subgroup range-control" title="Left column width">
                     <label for="widthSlider_${uniqueIdSuffix}">L:</label>
                     <input type="range" id="widthSlider_${uniqueIdSuffix}" class="control-range section-width-slider" min="20" max="80" value="50" step="1">
                     <span class="control-value section-width-value">50%</span>
                 </div>`;
 
-            // Внутреннее содержимое для двух колонок
+            // Inner content for two columns
             innerContentHTML = `
                 <div class="resume-columns-container">
                     <div class="resume-column column-left">
-                        <!-- Можно добавить блок по умолчанию, если нужно -->
+                        <!-- Default block can be added if needed -->
                         <!-- ${createBlockByType('custom')?.outerHTML || '<p>Add content...</p>'} -->
                     </div>
                     <div class="resume-column column-right"></div>
@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { // 'full-width'
             innerContentHTML = `
                 <div class="resume-full-width-container" style="min-height: 50px;">
-                     <!-- Можно добавить блок по умолчанию, если нужно -->
+                     <!-- Default block can be added if needed -->
                      <!-- ${createBlockByType('custom')?.outerHTML || '<p>Add content...</p>'} -->
                 </div>`;
         }
@@ -649,37 +649,41 @@ document.addEventListener('DOMContentLoaded', () => {
                      return;
                  }
                  const deleteSectionBtn = target.closest('.section-controls .delete-section');
-                 if (deleteSectionBtn) { // ОСТАВИТЬ
-                      console.log('  - Клик по кнопке удаления секции');
-                      event.preventDefault();
-                      const section = deleteSectionBtn.closest('.resume-section');
-                      if (section) {
-                          sectionToDelete = section;
-                          if (deleteConfirmModal) {
-                              const modalText = deleteConfirmModal.querySelector('p');
-                              if (modalText) modalText.textContent = "Вы уверены, что хотите удалить эту секцию со всем её содержимым?";
-                              deleteConfirmModal.style.display = 'block';
-                          } else { /* fallback confirm */ if (confirm('Вы уверены?')) { removeSection(section); } sectionToDelete = null; }
-                      }
-                      return;
+                 if (deleteSectionBtn) {
+                     console.log('  - Клик по кнопке удаления секции');
+                     event.preventDefault();
+                     const section = deleteSectionBtn.closest('.resume-section');
+                     if (section) {
+                         sectionToDelete = section;
+                         if (deleteConfirmModal) {
+                             const modalText = deleteConfirmModal.querySelector('p');
+                             // --- UPDATE HERE ---
+                             if (modalText) modalText.textContent = "Are you sure you want to delete this section and all its content?";
+                             // --- END UPDATE ---
+                             deleteConfirmModal.style.display = 'block';
+                         } else { /* fallback confirm */ if (confirm('Are you sure?')) { removeSection(section); } sectionToDelete = null; }
+                     }
+                     return;
                  }
 
                  // --- Управление Блоками (Удаление, Скрытие заголовка) ---
                  const deleteBlockBtn = target.closest('.block-controls .delete-block');
-                  if (deleteBlockBtn) { // ОСТАВИТЬ
-                      console.log('  - Клик по кнопке удаления блока');
+                 if (deleteBlockBtn) {
+                     console.log('  - Клик по кнопке удаления блока');
                      event.preventDefault();
                      const block = deleteBlockBtn.closest('.resume-block');
                      if (block) {
                          blockToDelete = block;
                          if (deleteConfirmModal) {
                              const modalText = deleteConfirmModal.querySelector('p');
-                             if (modalText) modalText.textContent = "Вы уверены, что хотите удалить этот блок?";
+                              // --- UPDATE HERE ---
+                             if (modalText) modalText.textContent = "Are you sure you want to delete this block?";
+                              // --- END UPDATE ---
                              deleteConfirmModal.style.display = 'block';
-                         } else { /* fallback confirm */ if (confirm('Вы уверены?')) { if(block.parentNode) block.remove(); } blockToDelete = null; }
+                         } else { /* fallback confirm */ if (confirm('Are you sure?')) { if(block.parentNode) block.remove(); } blockToDelete = null; }
                      }
                      return;
-                  }
+                 }
                  const toggleTitleBtn = target.closest('.block-controls .toggle-title');
                  if (toggleTitleBtn) { // ОСТАВИТЬ
                       console.log('  - Клик по кнопке скрытия/показа заголовка блока');
@@ -778,12 +782,33 @@ document.addEventListener('DOMContentLoaded', () => {
                           tempDiv.innerHTML = newItemHtml;
                           const newItemElement = tempDiv.firstElementChild; // Get the element itself
                           // Find container: could be the block itself if items are direct children, or a specific container div
-                          const itemsContainer = block.querySelector('.experience-items-container') || block; // Adjust selector if you have a specific container
-                          itemsContainer.appendChild(newItemElement);
-                          // Optional: Add animation
-                          newItemElement.style.opacity = '0'; newItemElement.style.transition = 'opacity 0.3s ease-in';
-                          setTimeout(() => newItemElement.style.opacity = '1', 10);
-                          newItemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                          if (newItemElement) { // Check if element creation succeeded
+                               // *** FIX START: Add the delete button to the new experience item ***
+                               const header = newItemElement.querySelector('.experience-header');
+                               if (header && !header.querySelector('.delete-experience-item')) { // Check if not already present
+                                   const deleteBtn = document.createElement('button');
+                                   deleteBtn.className = 'control-btn delete-item delete-experience-item';
+                                   deleteBtn.title = 'Delete Сompany'; // Or 'Удалить компанию'
+                                   deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                                   header.appendChild(deleteBtn);
+                                   console.log("   - Added delete button to new experience item header.");
+                               } else if (!header) {
+                                    console.warn("   - Could not find .experience-header in new item to add delete button.");
+                               }
+                               // *** FIX END ***
+
+                                // Find container: could be the block itself if items are direct children, or a specific container div
+                               const itemsContainer = block.querySelector('.experience-items-container') || block; // Adjust selector if you have a specific container
+                               itemsContainer.appendChild(newItemElement);
+
+                               // Optional: Add animation
+                               newItemElement.style.opacity = '0'; newItemElement.style.transition = 'opacity 0.3s ease-in';
+                               setTimeout(() => newItemElement.style.opacity = '1', 10);
+                               newItemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                          } else {
+                                console.error("   - Failed to create experience item element from HTML string.");
+                          }
                       }
                       return;
                   }
@@ -806,21 +831,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                  // --- Add Position within an Experience Item ---
-                  const addPositionBtn = target.closest('.add-position-btn');
-                   if (addPositionBtn) {
-                       console.log('  - Клик по кнопке добавления позиции');
-                       event.preventDefault();
-                       const positionsList = addPositionBtn.closest('.experience-item')?.querySelector('.positions-list');
-                       if (positionsList) {
-                           const newPositionEntry = createPositionEntryHTML();
-                           positionsList.appendChild(newPositionEntry);
-                           // Optional: Animation
-                           newPositionEntry.style.opacity = '0'; newPositionEntry.style.transition = 'opacity 0.3s ease-in';
-                           setTimeout(() => newPositionEntry.style.opacity = '1', 10);
-                           newPositionEntry.querySelector('.job-position')?.focus(); // Focus new position
-                       }
-                       return;
-                   }
+                 const addPositionBtn = target.closest('.add-position-btn');
+                  if (addPositionBtn) {
+                      console.log('  - Клик по кнопке добавления позиции');
+                      event.preventDefault();
+                      const positionsList = addPositionBtn.closest('.experience-item')?.querySelector('.positions-list');
+                      if (positionsList) {
+                          // *** FIX: Create a temporary container to convert HTML string to DOM element ***
+                          const newPositionEntryHtmlString = createPositionEntryHTML(); // Returns STRING
+                          const tempDiv = document.createElement('div');
+                          tempDiv.innerHTML = newPositionEntryHtmlString.trim(); // Parse the HTML string
+                          const newPositionEntryElement = tempDiv.firstElementChild; // Get the actual DOM element
+
+                          if (newPositionEntryElement) { // Check if element was successfully created
+                               positionsList.appendChild(newPositionEntryElement); // Append the actual ELEMENT
+                               console.log("   - Position entry element appended:", newPositionEntryElement);
+
+                               // Optional: Animation
+                               newPositionEntryElement.style.opacity = '0';
+                               newPositionEntryElement.style.transition = 'opacity 0.3s ease-in';
+                               setTimeout(() => newPositionEntryElement.style.opacity = '1', 10);
+                               newPositionEntryElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                               // Optional: Focus new position span
+                               const jobPositionSpan = newPositionEntryElement.querySelector('.job-position');
+                               if (jobPositionSpan) {
+                                    setTimeout(() => {
+                                         // Ensure focus lands inside the contenteditable span
+                                        const editableSpan = jobPositionSpan.querySelector('span[contenteditable="true"]');
+                                        if (editableSpan) editableSpan.focus();
+                                    }, 50);
+                               }
+
+                          } else {
+                               console.error("   - Failed to create position entry element from HTML string.");
+                          }
+                      }
+                      return;
+                  }
                    // --- Delete Position within an Experience Item ---
                    const deletePositionBtn = target.closest('.delete-position-entry');
                     if (deletePositionBtn) {
@@ -853,12 +901,30 @@ document.addEventListener('DOMContentLoaded', () => {
                           const tempDiv = document.createElement('div');
                           tempDiv.innerHTML = newItemHtml;
                           const newItemElement = tempDiv.firstElementChild;
-                          const itemsContainer = block.querySelector('.education-items-container') || block; // Adjust selector if needed
-                          itemsContainer.appendChild(newItemElement);
-                          // Optional: Animation
-                          newItemElement.style.opacity = '0'; newItemElement.style.transition = 'opacity 0.3s ease-in';
-                          setTimeout(() => newItemElement.style.opacity = '1', 10);
-                          newItemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                          if (newItemElement) { // Check if element creation succeeded
+                              // *** FIX START: Add the delete button to the new education item ***
+                              const header = newItemElement.querySelector('.education-header');
+                              if (header && !header.querySelector('.delete-education-item')) { // Check if not already present
+                                   const deleteBtn = document.createElement('button');
+                                   deleteBtn.className = 'control-btn delete-item delete-education-item';
+                                   deleteBtn.title = 'Delete Education'; // Or 'Удалить место учебы'
+                                   deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                                   header.appendChild(deleteBtn);
+                                   console.log("   - Added delete button to new education item header.");
+                               } else if (!header) {
+                                    console.warn("   - Could not find .education-header in new item to add delete button.");
+                               }
+                              // *** FIX END ***
+
+                              const itemsContainer = block.querySelector('.education-items-container') || block; // Adjust selector if needed
+                              itemsContainer.appendChild(newItemElement);
+                              // Optional: Animation
+                              newItemElement.style.opacity = '0'; newItemElement.style.transition = 'opacity 0.3s ease-in';
+                              setTimeout(() => newItemElement.style.opacity = '1', 10);
+                              newItemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                          } else {
+                               console.error("   - Failed to create education item element from HTML string.");
+                          }
                       }
                       return;
                   }
@@ -1432,7 +1498,7 @@ document.addEventListener('DOMContentLoaded', () => {
              } else {
                  console.error("Элементы модального окна URL не найдены!");
                  // Fallback на старый prompt, если модалка не найдена
-                 const url = prompt('Введите URL ссылки:', 'https://');
+                 const url = prompt('Enter the link URL:', 'https://');
                  if (url) {
                      // Здесь стандартный applyCommand может не сработать, так как savedRange мог быть null
                      // Лучше оставить как есть или добавить проверку savedRange
@@ -2324,81 +2390,81 @@ if (increaseFontSizeBtn) {
                  // H1 and job-title likely have specific styles, avoid default span here
                  contentHtml = `
                     <div contenteditable="false">
-                        <h1 contenteditable="true">Ваше Имя</h1>
-                        <p class="job-title" contenteditable="true">Желаемая должность</p>
+                        <h1 contenteditable="true">Your Name</h1>
+                        <p class="job-title" contenteditable="true">Desired Position</p>
                     </div>`;
                 break;
             case 'contact':
                  needsTitleToggle = true;
                  // Items are handled by createContactItem, which will add spans
                  contentHtml = `
-                    <h2 contenteditable="true">Контакты</h2>
+                    <h2 contenteditable="true">Contact</h2>
                     <div id="contact-list-container">
-                        ${createContactItem('fas fa-phone', 'Телефон').outerHTML}
+                        ${createContactItem('fas fa-phone', 'Phone').outerHTML}
                         ${createContactItem('fas fa-envelope', 'email@example.com').outerHTML}
                     </div>
-                    <button class="add-item-btn add-contact-btn"><i class="fas fa-plus"></i> Добавить контакт</button>`;
+                    <button class="add-item-btn add-contact-btn"><i class="fas fa-plus"></i> Add contact</button>`;
                 break;
             case 'about':
                  needsTitleToggle = true;
-                 contentHtml = `<h2 contenteditable="true">О себе</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Расскажите о себе...${defaultSizeSpanEnd}</p></div>`;
+                 contentHtml = `<h2 contenteditable="true">About Me</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Tell something about yourself...${defaultSizeSpanEnd}</p></div>`;
                 break;
             case 'experience':
                  needsTitleToggle = true;
                  block.classList.add('experience-block');
                  // Initial item handled by createExperienceItemHTML (which adds spans)
                  contentHtml = `
-                    <h2 contenteditable="true">Опыт работы</h2>
+                    <h2 contenteditable="true">Experience</h2>
                     <div class="experience-items-container"> <!-- Container added -->
                         ${createExperienceItemHTML()}
                     </div>
-                    <button class="add-item-btn add-experience-item-btn"><i class="fas fa-plus"></i> Добавить компанию</button>`;
+                    <button class="add-item-btn add-experience-item-btn"><i class="fas fa-plus"></i> Add company</button>`;
                 break;
              case 'education':
                  needsTitleToggle = true;
                  block.classList.add('education-block');
                  // Initial item handled by createEducationItemHTML (which adds spans)
                  contentHtml = `
-                    <h2 contenteditable="true">Образование</h2>
+                    <h2 contenteditable="true">Education</h2>
                     <div class="education-items-container">
                         ${createEducationItemHTML()}
                     </div>
-                    <button class="add-item-btn add-education-item-btn"><i class="fas fa-plus"></i> Добавить место учебы</button>`;
+                    <button class="add-item-btn add-education-item-btn"><i class="fas fa-plus"></i> Add institution</button>`;
                 break;
             case 'skills':
                  needsTitleToggle = true;
-                 contentHtml = `<h2 contenteditable="true">Навыки</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Перечислите навыки...${defaultSizeSpanEnd}</p></div>`;
+                 contentHtml = `<h2 contenteditable="true">Skills</h2><div contenteditable="true"><p>${defaultSizeSpanStart}List your skills...${defaultSizeSpanEnd}</p></div>`;
                 break;
             case 'languages':
                  needsTitleToggle = true;
                  // Items handled by createLanguageItem (which adds spans)
                  contentHtml = `
-                    <h2 contenteditable="true">Языки</h2>
+                    <h2 contenteditable="true">Languages</h2>
                     <div id="language-list">
-                       ${createLanguageItem("Язык 1", 3, "(Уровень)").outerHTML}
+                       ${createLanguageItem("Language 1", 3, "(Level)").outerHTML}
                     </div>
-                    <button class="add-item-btn add-language-btn"><i class="fas fa-plus"></i> Добавить язык</button>`;
+                    <button class="add-item-btn add-language-btn"><i class="fas fa-plus"></i> Add language</button>`;
                 break;
             case 'other':
                  needsTitleToggle = true;
-                 contentHtml = `<h2 contenteditable="true">Другое</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Дополнительная информация...${defaultSizeSpanEnd}</p></div>`;
+                 contentHtml = `<h2 contenteditable="true">Other</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Additional information...${defaultSizeSpanEnd}</p></div>`;
                 break;
             case 'custom':
                  needsTitleToggle = true;
-                 contentHtml = `<h2 contenteditable="true">Новый Заголовок</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Текст вашего блока...${defaultSizeSpanEnd}</p></div>`;
+                 contentHtml = `<h2 contenteditable="true">New Heading</h2><div contenteditable="true"><p>${defaultSizeSpanStart}Your custom block text...${defaultSizeSpanEnd}</p></div>`;
                 break;
             default:
-                 console.error("Неизвестный тип блока:", type);
+                 console.error("Unknown block type:", type);
                  return null; // Return null for unknown types
         }
 
         // --- Generate Controls HTML ---
         let controlsHtml = '<div class="block-controls">';
         if (needsTitleToggle) {
-            controlsHtml += `<button class="control-btn toggle-title" title="Скрыть/показать заголовок блока"><i class="fas fa-heading"></i></button>`;
+            controlsHtml += `<button class="control-btn toggle-title" title="Toggle block title visibility"><i class="fas fa-heading"></i></button>`;
         }
         if (needsDelete) {
-            controlsHtml += `<button class="control-btn delete-block" title="Удалить блок"><i class="fas fa-trash-alt"></i></button>`;
+            controlsHtml += `<button class="control-btn delete-block" title="Delete block"><i class="fas fa-trash-alt"></i></button>`;
         }
         controlsHtml += '</div>';
         if (controlsHtml === '<div class="block-controls"></div>') { controlsHtml = ''; }
@@ -2407,13 +2473,12 @@ if (increaseFontSizeBtn) {
         block.innerHTML = controlsHtml + contentHtml;
 
         // --- Add Delete Buttons to Initial Items (Experience/Education) ---
-        // (Эта логика остается без изменений, т.к. кнопки не зависят от размера шрифта)
         if (type === 'experience') {
             block.querySelectorAll('.experience-items-container > .experience-item').forEach(item => {
                  if (!item.querySelector('.delete-experience-item')) {
                      const deleteBtn = document.createElement('button');
                      deleteBtn.className = 'control-btn delete-item delete-experience-item';
-                     deleteBtn.title = 'Удалить компанию';
+                     deleteBtn.title = 'Delete company';
                      deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
                      const header = item.querySelector('.experience-header');
                      if (header) header.appendChild(deleteBtn);
@@ -2424,7 +2489,7 @@ if (increaseFontSizeBtn) {
                  if (!pos.querySelector('.delete-position-entry')) {
                      const deletePosBtn = document.createElement('button');
                      deletePosBtn.className = 'control-btn delete-item delete-position-entry';
-                     deletePosBtn.title = 'Удалить позицию';
+                     deletePosBtn.title = 'Delete position';
                      deletePosBtn.innerHTML = '<i class="fas fa-times"></i>';
                      const pTag = pos.querySelector('p');
                      if (pTag) pTag.appendChild(deletePosBtn);
@@ -2437,7 +2502,7 @@ if (increaseFontSizeBtn) {
                  if (!item.querySelector('.delete-education-item')) {
                      const deleteBtn = document.createElement('button');
                      deleteBtn.className = 'control-btn delete-item delete-education-item';
-                     deleteBtn.title = 'Удалить место учебы';
+                     deleteBtn.title = 'Delete institution';
                      deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
                      const header = item.querySelector('.education-header');
                      if (header) header.appendChild(deleteBtn);
@@ -2486,24 +2551,24 @@ if (increaseFontSizeBtn) {
         }
         // --- КОНЕЦ НОВОГО БЛОКА ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
 
-    /**
-     * Creates HTML string for a single position entry within an experience item.
-     * @param {string} position - Default position title.
-     * @param {string} dates - Default work dates.
-     * @returns {string} HTML string for the position entry.
-     */
-    function createPositionEntryHTML(position = "Должность", dates = "Даты") {
-         // Returns a string, not an element directly anymore to be used in createExperienceItemHTML
-         return `
-             <div class="position-entry">
-                 <p>
-                     <span contenteditable="true" class="job-position"><span class="font-size-16">${position}</span></span> |
-                     <span contenteditable="true" class="work-dates"><span class="font-size-16">${dates}</span></span>
-                     <button class="control-btn delete-item delete-position-entry" title="Удалить позицию"><i class="fas fa-times"></i></button>
-                 </p>
-             </div>
-         `;
-     }
+        /**
+         * Creates HTML string for a single position entry within an experience item.
+         * @param {string} position - Default position title.
+         * @param {string} dates - Default work dates.
+         * @returns {string} HTML string for the position entry.
+         */
+        function createPositionEntryHTML(position = "Position", dates = "Dates") {
+             // Returns a string, not an element directly anymore to be used in createExperienceItemHTML
+             return `
+                 <div class="position-entry">
+                     <p>
+                         <span contenteditable="true" class="job-position"><span class="font-size-16">${position}</span></span> |
+                         <span contenteditable="true" class="work-dates"><span class="font-size-16">${dates}</span></span>
+                         <button class="control-btn delete-item delete-position-entry" title="Delete position"><i class="fas fa-times"></i></button>
+                     </p>
+                 </div>
+             `;
+         }
 
      /**
       * Creates HTML string for a full experience item (company).
@@ -2513,27 +2578,26 @@ if (increaseFontSizeBtn) {
       * @param {string} description - Default description text (can be HTML).
       * @returns {string} HTML string for the experience item.
       */
-      function createExperienceItemHTML(company = "Компания", initialPosition = "Должность", initialDates = "Даты", description = "<ul><li><span class='font-size-16'>Описание...</span></li></ul>") {
+      function createExperienceItemHTML(company = "Company", initialPosition = "Position", initialDates = "Dates", description = "<ul><li><span class='font-size-16'>Description...</span></li></ul>") {
          // Note: Company H3 is not wrapped in default size span
          // Initial position/dates are handled by createPositionEntryHTML
          // Description default now wraps text inside li with the span
          return `
              <div class="experience-item">
                   <div class="experience-header">
-                     <div class="logo-placeholder" title="Кликните для загрузки лого"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div>
+                     <div class="logo-placeholder" title="Click to upload logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div>
                      <div class="experience-info">
                          <h3 contenteditable="true">${company}</h3>
                          <div class="positions-list">
                               ${createPositionEntryHTML(initialPosition, initialDates)} <!-- String is inserted here -->
                          </div>
-                         <button class="add-item-btn add-position-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Добавить позицию</button>
+                         <button class="add-item-btn add-position-btn" style="margin-top: 5px;"><i class="fas fa-plus"></i> Add position</button>
                       </div>
                       <!-- Delete button for the company item is added by createBlockByType -->
                  </div>
                  <div class="experience-details" contenteditable="true">${description}</div>
              </div>`;
       }
-
 
      /**
       * Creates HTML string for a full education item.
@@ -2543,14 +2607,14 @@ if (increaseFontSizeBtn) {
       * @param {string} description - Default description text (can be HTML).
       * @returns {string} HTML string for the education item.
       */
-     function createEducationItemHTML(institution = "Учебное заведение", degree = "Специальность", years = "Годы", description = "<p><span class='font-size-16'>Описание...</span></p>") {
+     function createEducationItemHTML(institution = "Institution", degree = "Degree/Major", years = "Years", description = "<p><span class='font-size-16'>Description...</span></p>") {
          // Note: Institution H3 is not wrapped
          // Degree and Years are wrapped
          // Description default is wrapped
          return `
             <div class="education-item">
                 <div class="education-header">
-                    <div class="logo-placeholder" title="Кликните для загрузки лого"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div>
+                    <div class="logo-placeholder" title="Click to upload logo"><i class="fas fa-camera logo-icon-placeholder"></i><img src="" alt="Logo" class="logo-image" style="display: none;"><input type="file" accept="image/*" class="logo-input" style="display: none;"></div>
                     <div class="education-info">
                          <h3 contenteditable="true">${institution}</h3>
                          <p><span contenteditable="true" class="degree"><span class="font-size-16">${degree}</span></span> | <span contenteditable="true" class="study-years"><span class="font-size-16">${years}</span></span></p>
@@ -2561,7 +2625,6 @@ if (increaseFontSizeBtn) {
             </div>`;
      }
 
-
      /**
       * Creates HTML for a language item.
       * @param {string} name - Default language name.
@@ -2569,7 +2632,7 @@ if (increaseFontSizeBtn) {
       * @param {string} proficiency - Default proficiency text.
       * @returns {HTMLElement} The created language item element.
       */
-     function createLanguageItem(name = "Новый язык", level = 1, proficiency = "(Уровень)") {
+     function createLanguageItem(name = "New Language", level = 1, proficiency = "(Level)") {
          const item = document.createElement('div');
          item.className = 'language-item';
          const dotsHtml = Array(6).fill(0).map((_, i) =>
@@ -2577,9 +2640,9 @@ if (increaseFontSizeBtn) {
          ).join('');
          item.innerHTML = `
               <span contenteditable="true" class="language-name"><span class="font-size-16">${name}</span></span>
-              <div class="language-level-control" data-level="${level}" title="Кликните для выбора уровня">${dotsHtml}</div>
+              <div class="language-level-control" data-level="${level}" title="Click to select level">${dotsHtml}</div>
               <span contenteditable="true" class="language-proficiency"><span class="font-size-16">${proficiency}</span></span>
-              <button class="control-btn delete-item delete-language" title="Удалить язык"><i class="fas fa-times"></i></button>
+              <button class="control-btn delete-item delete-language" title="Delete language"><i class="fas fa-times"></i></button>
          `;
          return item;
      }
@@ -2665,17 +2728,16 @@ if (increaseFontSizeBtn) {
      * @param {string} text - Default text content.
      * @returns {HTMLElement} The created contact item element.
      */
-    function createContactItem(iconClass = 'fas fa-link', text = 'Новый контакт') {
+    function createContactItem(iconClass = 'fas fa-link', text = 'New contact') {
         const item = document.createElement('div');
         item.className = 'contact-item';
         item.innerHTML = `
-            <button class="control-btn change-icon-btn" title="Сменить иконку"><i class="${iconClass} icon"></i></button>
+            <button class="control-btn change-icon-btn" title="Change icon"><i class="${iconClass} icon"></i></button>
             <span class="contact-text" contenteditable="true"><span class="font-size-16">${text}</span></span>
-            <button class="control-btn delete-item delete-contact" title="Удалить контакт"><i class="fas fa-times"></i></button>
+            <button class="control-btn delete-item delete-contact" title="Delete contact"><i class="fas fa-times"></i></button>
         `;
         return item;
     }
-
  
 
     // --- Обработчики для модального окна подтверждения удаления ---
@@ -2735,7 +2797,7 @@ if (increaseFontSizeBtn) {
              // Reset modal text to default (for blocks)
              const modalText = deleteConfirmModal.querySelector('p');
              if (modalText) {
-                 modalText.textContent = "Вы уверены, что хотите удалить этот блок?";
+                 modalText.textContent = "Are you sure you want to delete this block?";
              }
         }
     };
