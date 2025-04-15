@@ -234,103 +234,161 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     });
 
+    // Inside importExport.js
+
+    /**
+     * Clears the existing resume content and rebuilds it based on the provided data object.
+     * @param {object} data - The resume data object parsed from JSON.
+     */
     function rebuildResume(data) {
+        // --- 1. Validate Input Data ---
         if (!data || !Array.isArray(data.sections)) {
-            throw new Error("Неверный формат данных JSON: отсутствует массив 'sections'.");
+            throw new Error("Invalid JSON data format: 'sections' array is missing or data is null.");
         }
 
-        // --- CRITICAL: Clear existing content ---
-        // Destroy existing Sortable instances if they exist before clearing
-        // NOTE: This assumes you have a way to access/destroy them.
-        // If not, simply clearing might be okay, but Sortable might hold references.
-        // A robust way would be to iterate and call `sortableInstance.destroy()` if available.
+        // --- 2. Clear Existing Content and Sortable Instances ---
+        const resumeContainer = document.getElementById('resumeToExport');
+        if (!resumeContainer) {
+            console.error("Resume container #resumeToExport not found during rebuild.");
+            return; // Cannot proceed
+        }
+
+        // Destroy existing Sortable instances on block containers before clearing
         resumeContainer.querySelectorAll('.resume-column, .resume-full-width-container').forEach(container => {
              if (container.sortableInstance) {
-                 try { container.sortableInstance.destroy(); } catch(e) {}
-                 delete container.sortableInstance;
+                 try {
+                     container.sortableInstance.destroy();
+                     console.log("Destroyed Sortable instance for:", container);
+                 } catch(e) {
+                     console.error("Error destroying Sortable instance:", e, container);
+                 }
+                 delete container.sortableInstance; // Remove reference
              }
         });
-        resumeContainer.innerHTML = ''; // Clear the main container
+        // Clear the main resume container HTML
+        resumeContainer.innerHTML = '';
+        console.log("Cleared existing resume content and Sortable instances.");
 
-        // --- Rebuild sections ---
-        data.sections.forEach(sectionData => {
-            // Use the existing createSectionHTML function (assuming it's globally available)
-            // or ideally, have a dedicated builder function here.
-            // For simplicity, we'll try to reuse createSectionHTML and modify it.
-             if (typeof createSectionHTML !== 'function') {
-                 console.error("Функция createSectionHTML не найдена. Невозможно создать секцию.");
+        // --- 3. Rebuild Sections ---
+        data.sections.forEach((sectionData, sectionIndex) => {
+            console.log(`Rebuilding Section ${sectionIndex}, type: ${sectionData.type}`);
+
+            // Ensure helper functions are available
+            if (typeof createSectionHTML !== 'function' || typeof buildBlockFromData !== 'function' ) {
+                 console.error(`Essential function (createSectionHTML or buildBlockFromData) not found. Cannot rebuild section ${sectionIndex}.`);
                  return; // Skip this section
              }
 
-             const newSection = createSectionHTML(sectionData.type); // Create basic structure
-
-             // Apply styles
-             if (sectionData.styles?.fontFamily) {
-                 newSection.style.fontFamily = sectionData.styles.fontFamily;
-                 const fontSelect = newSection.querySelector('.section-font-select');
-                 if (fontSelect) fontSelect.value = sectionData.styles.fontFamily;
-             }
-             if (sectionData.styles?.h2UnderlineColor) {
-                 newSection.style.setProperty('--section-h2-underline-color', sectionData.styles.h2UnderlineColor);
-                 const colorInput = newSection.querySelector('.section-h2-color');
-                 if(colorInput) colorInput.value = sectionData.styles.h2UnderlineColor;
+             // Create the basic section structure using the helper function
+             // createSectionHTML is now responsible for adding mouseenter/mouseleave listeners
+             const newSection = createSectionHTML(sectionData.type);
+             if (!newSection) {
+                 console.error(`Failed to create HTML for section ${sectionIndex}.`);
+                 return; // Skip if creation failed
              }
 
-            // Set column width for two-column layouts
-            if (sectionData.type === 'two-column' && sectionData.leftColumnWidth) {
-                 const leftCol = newSection.querySelector('.column-left');
-                 const rightCol = newSection.querySelector('.column-right');
-                 const slider = newSection.querySelector('.section-width-slider');
-                 const valueDisplay = newSection.querySelector('.section-width-value');
-
-                 if (typeof updateSectionColumnWidths === 'function' && leftCol && rightCol && valueDisplay) {
-                    updateSectionColumnWidths(sectionData.leftColumnWidth.toString(), leftCol, rightCol, valueDisplay);
-                     if (slider) slider.value = sectionData.leftColumnWidth;
-                 } else { // Fallback if function not available
-                     if (leftCol) leftCol.style.flexBasis = `${sectionData.leftColumnWidth}%`;
-                     if (valueDisplay) valueDisplay.textContent = `${sectionData.leftColumnWidth}%`;
-                     if (slider) slider.value = sectionData.leftColumnWidth;
-                     console.warn("Функция updateSectionColumnWidths не найдена, применен базовый стиль flex-basis.");
+             // --- Apply Section Styles ---
+             try {
+                 if (sectionData.styles?.fontFamily) {
+                     newSection.style.fontFamily = sectionData.styles.fontFamily;
+                     const fontSelect = newSection.querySelector('.section-font-select');
+                     // Ensure font options are populated before setting value
+                     if (fontSelect) {
+                         // populateFontDropdown(fontSelect, "Section Font"); // Uncomment if needed
+                         fontSelect.value = sectionData.styles.fontFamily;
+                         // Verify value was set
+                         if (fontSelect.value !== sectionData.styles.fontFamily) {
+                             console.warn(`Section ${sectionIndex}: Font '${sectionData.styles.fontFamily}' not found in dropdown. Applied style, but select may be wrong.`);
+                         }
+                     }
                  }
-            }
+                 if (sectionData.styles?.h2UnderlineColor) {
+                     newSection.style.setProperty('--section-h2-underline-color', sectionData.styles.h2UnderlineColor);
+                     const colorInput = newSection.querySelector('.section-h2-color');
+                     if(colorInput) {
+                         colorInput.value = sectionData.styles.h2UnderlineColor;
+                     }
+                 }
+             } catch (styleError) {
+                  console.error(`Error applying styles to section ${sectionIndex}:`, styleError);
+             }
 
-            // Clear default placeholder content from columns (if any)
-            const columnElements = newSection.querySelectorAll('.resume-column, .resume-full-width-container');
-            columnElements.forEach(colEl => colEl.innerHTML = '');
+             // --- Set Column Width for Two-Column Layouts ---
+             if (sectionData.type === 'two-column' && sectionData.leftColumnWidth) {
+                const leftCol = newSection.querySelector('.column-left');
+                const rightCol = newSection.querySelector('.column-right');
+                const slider = newSection.querySelector('.section-width-slider');
+                const valueDisplay = newSection.querySelector('.section-width-value');
 
-            // Populate columns with blocks
-            if (Array.isArray(sectionData.columns)) {
+                // Ensure all elements exist before proceeding
+                if (leftCol && rightCol && slider && valueDisplay) {
+                     if (typeof updateSectionColumnWidths === 'function') {
+                        updateSectionColumnWidths(sectionData.leftColumnWidth.toString(), leftCol, rightCol, valueDisplay);
+                        slider.value = sectionData.leftColumnWidth;
+                     } else { // Fallback if function not available
+                        leftCol.style.flexBasis = `${sectionData.leftColumnWidth}%`;
+                        rightCol.style.flexBasis = `${100 - sectionData.leftColumnWidth}%`; // Also set right column
+                        valueDisplay.textContent = `${sectionData.leftColumnWidth}%`;
+                        slider.value = sectionData.leftColumnWidth;
+                        console.warn(`Section ${sectionIndex}: Function updateSectionColumnWidths not found, applied basic flex-basis style.`);
+                     }
+                 } else {
+                     console.warn(`Section ${sectionIndex}: Could not find all elements needed for two-column width adjustment (L:${!!leftCol}, R:${!!rightCol}, Slider:${!!slider}, Display:${!!valueDisplay}).`);
+                 }
+             }
+
+             // --- Clear Default Content from Columns ---
+             const columnElements = newSection.querySelectorAll('.resume-column, .resume-full-width-container');
+             columnElements.forEach(colEl => colEl.innerHTML = ''); // Clear any template content
+
+             // --- Populate Columns with Blocks ---
+             if (Array.isArray(sectionData.columns)) {
                 sectionData.columns.forEach((columnData, colIndex) => {
-                     if (colIndex < columnElements.length && Array.isArray(columnData.blocks)) {
+                    // Ensure target column exists and block data is valid
+                     if (colIndex < columnElements.length && columnData && Array.isArray(columnData.blocks)) {
                          const targetColumn = columnElements[colIndex];
-                         columnData.blocks.forEach(blockData => {
-                             const newBlock = buildBlockFromData(blockData);
+                         columnData.blocks.forEach((blockData, blockIndex) => {
+                             console.log(`  - Rebuilding Block ${blockIndex} in Column ${colIndex}, type: ${blockData?.type}`);
+                             const newBlock = buildBlockFromData(blockData); // buildBlockFromData handles block creation
                              if (newBlock) {
                                  targetColumn.appendChild(newBlock);
+                             } else {
+                                  console.warn(`    - Failed to build block ${blockIndex} from data:`, blockData);
                              }
                          });
+                     } else {
+                          console.warn(`Section ${sectionIndex}: Invalid column data or index out of bounds for column ${colIndex}.`);
                      }
                 });
-            }
+             } else {
+                  console.warn(`Section ${sectionIndex}: 'columns' array not found or invalid.`);
+             }
 
-            resumeContainer.appendChild(newSection);
+             // --- Append the Completed Section to the Container ---
+             resumeContainer.appendChild(newSection);
 
-            // --- CRITICAL: Re-initialize Sortable for the blocks INSIDE this new section ---
-            if (typeof initializeInnerSortable === 'function') {
-                initializeInnerSortable(newSection);
-            } else {
-                 console.warn("Функция initializeInnerSortable не найдена. Перетаскивание блоков в новой секции может не работать.");
-            }
-        });
+             // --- Re-initialize Sortable for Blocks WITHIN this Section ---
+             if (typeof initializeInnerSortable === 'function') {
+                 console.log(`Initializing inner Sortable for section ${sectionIndex}...`);
+                 initializeInnerSortable(newSection);
+             } else {
+                  console.warn(`Function initializeInnerSortable not found. Drag-and-drop for blocks in section ${sectionIndex} might not work.`);
+             }
 
-        // --- CRITICAL: Update Add Section buttons positioning AFTER all sections are added ---
-         if (typeof updateAddSectionButtons === 'function') {
-             updateAddSectionButtons();
-         } else {
-              console.warn("Функция updateAddSectionButtons не найдена. Кнопки '+' могут быть не на месте.");
-         }
+             // Mouseenter/mouseleave listeners are now added by createSectionHTML, no need to add them here.
+
+        }); // End loop through data.sections
+
+        // --- 4. Final Updates After All Sections are Added ---
+        if (typeof updateAddSectionButtons === 'function') {
+            console.log("Updating '+' add section button positions...");
+            updateAddSectionButtons();
+        } else {
+             console.warn("Function updateAddSectionButtons not found. '+' buttons might be misplaced.");
+        }
+
+        console.log("Resume rebuild completed.");
     }
-
 
     function buildBlockFromData(blockData) {
         if (!blockData || !blockData.type) return null;

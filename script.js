@@ -39,8 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentContactIconBtn = null; // Хранит кнопку контакта, для которой выбирается иконка
     let blockToDelete = null; // Хранит блок, который нужно удалить
+    let isAnythingDragging = false; 
     // --- Глобальная переменная для хранения последнего валидного выделения ---
     let savedRange = null;
+
 
     // --- Ссылки на элементы модального окна подтверждения удаления ---
     const deleteConfirmModal = document.getElementById('deleteConfirmModal');
@@ -199,6 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
               }
           }
 
+          section.addEventListener('mouseenter', () => showSectionControls(section));
+          section.addEventListener('mouseleave', () => hideSectionControls(section));
+          hideSectionControls(section); // Ensure controls start hidden
+
           // Инициализация Sortable для блоков ВНУТРИ этой секции
           console.log(`[Init Section ${index}] Инициализация внутреннего Sortable...`);
           initializeInnerSortable(section); // Эта функция должна быть определена
@@ -212,24 +218,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Sortable для перетаскивания СЕКЦИЙ внутри resumeToExport
     if (resumeContainer) {
         new Sortable(resumeContainer, {
-            group: 'sections', // Group for sections themselves
+            group: 'sections',
             animation: 150,
-            handle: '.drag-section-handle', // Drag sections by this handle
-            draggable: '.draggable-section', // CSS class for draggable sections
-            ghostClass: 'section-sortable-ghost', // Distinct ghost class for sections
-            chosenClass: 'section-sortable-chosen', // Distinct chosen class
-            dragClass: 'section-sortable-drag',   // Distinct drag class
-            // Prevent starting drag when clicking other buttons within controls
+            handle: '.drag-section-handle',
+            draggable: '.draggable-section',
+            ghostClass: 'section-sortable-ghost',
+            chosenClass: 'section-sortable-chosen',
+            dragClass: 'section-sortable-drag',
             filter: '.section-controls button:not(.drag-section-handle), .add-section-placeholder',
-            preventOnFilter: true, // Stop default action for filtered elements
-            onEnd: function (evt) {
-                // After dragging a section, update the "+" add buttons' positions
-                updateAddSectionButtons();
-                hideToolbar(); // Hide text toolbar just in case
-            },
+            preventOnFilter: true,
             onStart: () => {
-                hideToolbar(); // Hide text toolbar when section drag starts
-                closeAddSectionOptions(); // Close any open "+" button popups
+                isAnythingDragging = true; // <-- УСТАНОВИТЬ ФЛАГ
+                console.log('Section drag started, isAnythingDragging = true'); // Debug log
+                hideToolbar();
+                closeAddSectionOptions();
+                // Скрываем ВСЕ контролы секций при начале перетаскивания секции
+                document.querySelectorAll('.resume-section').forEach(hideSectionControls);
+            },
+            onEnd: function (evt) {
+                isAnythingDragging = false; // <-- СБРОСИТЬ ФЛАГ
+                console.log('Section drag ended, isAnythingDragging = false'); // Debug log
+                updateAddSectionButtons();
+                hideToolbar();
+                const movedSection = evt.item; // Элемент, который перетаскивали
+                if (movedSection && movedSection.matches('.resume-section')) {
+                     console.log("Section drop end: Attempting to show controls for moved section:", movedSection);
+                     // Поскольку isAnythingDragging теперь false, showSectionControls сработает
+                     showSectionControls(movedSection);
+                }
             }
         });
     }
@@ -242,41 +258,46 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAddSectionButtons();
         }, 150); // Задержка в мс (можно подбирать 100-250)
         const innerSortableOptions = {
-            group: 'resume-blocks', // Blocks can be moved between any compatible container
+            group: 'resume-blocks',
             animation: 150,
-             // Let blocks be dragged by default, but filter interactions below
-            handle: '.resume-block', // Could use a specific handle if needed later
-            draggable: '.draggable', // Class for draggable blocks
-            ghostClass: 'block-sortable-ghost', // Distinct ghost class for blocks
+            handle: '.resume-block',
+            draggable: '.draggable',
+            ghostClass: 'block-sortable-ghost',
             chosenClass: 'block-sortable-chosen',
             dragClass: 'block-sortable-drag',
-            // IMPORTANT: Filter out contenteditable, inputs, and specific controls
-            // to allow interaction without starting block drag.
             filter: '[contenteditable="true"], input, textarea, select, .block-controls button, .control-btn, .language-level-control, .logo-placeholder, .add-item-btn',
-            preventOnFilter: false, // IMPORTANT: Let default actions (like editing, clicking buttons) happen on filtered elements
+            preventOnFilter: false,
             onStart: () => {
-                hideToolbar(); // Hide text toolbar when block drag starts
-                closeAddSectionOptions(); // Close "+" popups
+                isAnythingDragging = true; // <-- УСТАНОВИТЬ ФЛАГ
+                console.log('Block drag started, isAnythingDragging = true'); // Debug log
+                hideToolbar();
+                closeAddSectionOptions();
                 closeAllSectionDropdowns();
-             },
-              onEnd: function (evt) {
-                 // Обновляем позиции кнопок "+" после того, как блок "приземлился"
-                 updateAddSectionButtons();
-                 // Дополнительно: можно скрыть тулбар на всякий случай
-                 hideToolbar();
-             },
-
-             // ---> ДОБАВЛЯЕМ/ИЗМЕНЯЕМ onMove <---
-             onMove: function (evt) {
-                 // Вызываем дебаунсированную функцию при каждом движении
-                 debouncedUpdateAddButtons();
-
-                 // Важно: onMove может использоваться для отмены перемещения (return false).
-                 // Если нам не нужно ничего отменять, можно ничего не возвращать (или return true).
-                 return true; // Разрешаем перемещение по умолчанию
-             }
+                 // Скрываем ВСЕ контролы секций при начале перетаскивания блока
+                document.querySelectorAll('.resume-section').forEach(hideSectionControls);
+            },
+            onEnd: function (evt) {
+                isAnythingDragging = false; // <-- СБРОСИТЬ ФЛАГ
+                console.log('Block drag ended, isAnythingDragging = false'); // Debug log
+                updateAddSectionButtons();
+                hideToolbar();
+                const targetContainer = evt.to; // Контейнер (колонка), куда элемент был перемещен
+                if (targetContainer) {
+                    const targetSection = targetContainer.closest('.resume-section');
+                    if (targetSection) {
+                        console.log("Block drop end: Attempting to show controls for target section:", targetSection);
+                        // Поскольку isAnythingDragging теперь false, showSectionControls сработает
+                        showSectionControls(targetSection);
+                    } else {
+                         console.warn("Block drop end: Could not find parent section for target container:", targetContainer);
+                    }
+                }
+            },
+            onMove: function (evt) {
+                debouncedUpdateAddButtons();
+                return true;
+            }
         };
-
         // Find potential containers for blocks WITHIN this section
         // Includes columns and the container used in full-width sections
         const blockContainers = sectionElement.querySelectorAll('.resume-column, .resume-full-width-container');
@@ -386,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
             populateFontDropdown(fontSelect, "Шрифт секции");
             fontSelect.value = initialFont; // Устанавливаем начальное значение
         }
+
+        section.addEventListener('mouseenter', () => showSectionControls(section));
+        section.addEventListener('mouseleave', () => hideSectionControls(section));
 
         return section;
     }
@@ -2967,10 +2991,30 @@ if (urlInputModal) {
         });
     }
 
+
+    function showSectionControls(section) {
+        if (isAnythingDragging) { 
+            return;
+        }
+        if (section) {
+            // Optional: Check if we are currently dragging something to prevent showing
+            const isDragging = document.body.classList.contains('sortable-dragging'); // Example check
+            if (!isDragging) {
+                 section.classList.add('controls-visible');
+            }
+        }
+    }
+
+    function hideSectionControls(section) {
+        if (section) {
+            section.classList.remove('controls-visible');
+        }
+    }
+
     updateAddSectionButtons();
 
 
-     window.createSectionHTML = createSectionHTML;
+    window.createSectionHTML = createSectionHTML;
     window.updateAddSectionButtons = updateAddSectionButtons;
     window.initializeInnerSortable = initializeInnerSortable;
     window.createBlockByType = createBlockByType;

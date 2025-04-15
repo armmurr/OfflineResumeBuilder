@@ -723,30 +723,52 @@ border-bottom: 2px solid var(--section-h2-underline-color, var(--h2-underline-co
    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-
-/* --- Контролы Секции (ОБНОВЛЕНО) --- */
 .section-controls {
     position: absolute;
     top: -45px;
-    margin-right: 10px;
+    margin-right: 10px; /* Изменено с margin-right */
     left: auto;
-    transform: none;
+    transform: none; /* Сброс transform, если нужно */
     display: flex;
     flex-wrap: nowrap;
-    gap: 6px; /* Уменьшим gap */
-    background-color: rgba(220, 220, 220, 0.95); /* Чуть плотнее фон */
-    padding: 5px; /* Уменьшим паддинг */
-    border-radius: 18px; /* Более скругленные края */
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    gap: 6px;
+    background-color: rgba(220, 220, 220, 0.95);
+    padding: 5px;
+    border-radius: 18px;
+    opacity: 0; /* Скрыты по умолчанию */
+    transition: opacity 0.2s ease-in-out; /* Оставляем анимацию */
     z-index: 50;
     border: 1px solid #bbb;
-    align-items: center; /* Выровняем элементы по центру вертикально */
+    align-items: center;
+    pointer-events: none; /* Игнорируем события мыши, когда скрыты */
 }
 
-/* Показываем при наведении на секцию */
-.resume-section:hover .section-controls {
+/* НОВОЕ правило: Показываем контролы, когда у секции есть класс 'controls-visible' */
+.resume-section.controls-visible .section-controls {
     opacity: 1;
+    pointer-events: auto; /* Разрешаем взаимодействие, когда видны */
+}
+
+/* Оставляем эффект на рамке самой секции при наведении */
+.resume-section:not(.sortable-chosen):not(.sortable-drag):hover {
+     border-color: var(--accent-color-primary);
+}
+
+.resume-section.controls-visible .section-controls::after {
+    content: ''; /* Обязательно для псевдоэлемента */
+    position: absolute;
+    /* Позиционируем под контролами */
+    top: 100%; /* Начинается сразу под нижней границей .section-controls */
+    left: 0;
+    right: 0; /* Или width: 100%; */
+    /* Высота "моста" - подберите значение, чтобы перекрыть зазор */
+    height: 15px; /* Например, 15px - можно настроить */
+    background: transparent; /* Делаем его невидимым */
+    /* Важно: он должен быть частью области, реагирующей на мышь,
+       так как он внутри .section-controls, он унаследует pointer-events: auto */
+    /* pointer-events: auto; */ /* Можно явно указать, но должно наследоваться */
+    /* z-index: -1; */ /* Можно поставить ниже, если нужно, но не обязательно */
+    /* display: block; */ /* Убедимся, что это блочный элемент */
 }
 
 /* Стили для элементов внутри .section-controls */
